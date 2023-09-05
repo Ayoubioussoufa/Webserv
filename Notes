@@ -27,6 +27,14 @@ The TRACE method performs a message loop-back test along the path to the target 
 
 PATCH
 The PATCH method applies partial modifications to a resource.
+
+There are 9 HTTP methods.
+Some of them are:
+GET — Fetch a URL
+HEAD — Fetch information about a URL
+PUT — Store to an URL
+POST — Send form data to a URL and get a response back
+DELETE — Delete a URL GET and POST (forms) are commonly used
 --------------------------------------------------
 
 HTTP response status codes indicate whether a specific HTTP request has been successfully completed. Responses are grouped in five classes:

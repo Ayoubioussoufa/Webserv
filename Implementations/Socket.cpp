@@ -6,60 +6,100 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:12:03 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/04 17:33:37 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/05 16:39:05 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Socket.hpp"
 
-// testing !!!
+#define PORT 8080 // Where the clients can reach at
+#define MAX_CLIENTS 10 // Maximum number of clients to handle
 
-int Socket::function()
-{
+int Socket::function() {
     int server_fd;
-    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
-    {
-        perror("cannot create socket"); 
-        return 0; 
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) <= 0) {
+        perror("Cannot create socket");
+        return 0;
     }
-    struct sockaddr_in address;
-    const int PORT = 8080; //Where the clients can reach at
-    /* htonl converts a long integer (e.g. address) to a network representation */ 
-    /* htons converts a short integer (e.g. port) to a network representation */ 
-    memset((char *)&address, 0, sizeof(address)); 
-    address.sin_family = AF_INET; 
-    address.sin_addr.s_addr = htonl(INADDR_ANY); 
-    address.sin_port = htons(PORT); 
-    if (bind(server_fd,(struct sockaddr *)&address,sizeof(address)) < 0) 
-    { 
-        perror("bind failed"); 
-        return 0; 
-    }
-    if (listen(server_fd, 3) < 0) 
-    { 
-        perror("In listen"); 
-        exit(EXIT_FAILURE); 
-    }
-    while (1)
-    {
-        printf("\n+++++++ Waiting for new connection ++++++++\n\n");
-        int new_socket;
-        socklen_t addrlen = sizeof(address);
-        if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
-        {
-            perror("In accept");            
-            exit(EXIT_FAILURE);        
+    //It creates a socket using socket() with the address family (AF_INET for IPv4) and socket type (SOCK_STREAM for a TCP socket). If socket() fails, it prints an error message using perror() and returns 0.
+    struct sockaddr_in address; // is defined to store socket address information.
+    memset((char *)&address, 0, sizeof(address));
+    address.sin_family = AF_INET; //address family (sin_family) to AF_INET for IPv4
+    address.sin_addr.s_addr = htonl(INADDR_ANY); //sin_addr.s_addr) to INADDR_ANY to listen on all available network interfaces
+    address.sin_port = htons(PORT);
+
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        perror("Bind failed");
+        return 0;
+    } // binds the socket to the IP address and port defined in address
+
+    if (listen(server_fd, MAX_CLIENTS) < 0) {
+        perror("Listen failed");
+        exit(EXIT_FAILURE);
+    } // listens for incoming connections on the server socket (server_fd).
+    
+    int client_socket[MAX_CLIENTS] = {0}; // store client socket descriptors. It is initialized to all zeros.
+    fd_set read_fds; //fd_set is a data structure used to manage file descriptors for I/O operations.
+    int max_sd; //will store the maximum file descriptor value for use in select()
+
+    while (1) {
+        FD_ZERO(&read_fds); // clears all file descriptors in the read_fds set.
+        FD_SET(server_fd, &read_fds); // adds the server socket server_fd to the read_fds set.
+        max_sd = server_fd;
+
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            if (client_socket[i] > 0) { //indicates an open socket
+                FD_SET(client_socket[i], &read_fds);
+                if (client_socket[i] > max_sd) {
+                    max_sd = client_socket[i];
+                }
+            }
         }
-        char buffer[1024] = {0};
-        int valread = read( new_socket , buffer, 1024); 
-        printf("%s\n", buffer);
-        if(valread < 0)
-        { 
-            printf("No bytes are there to read");
+
+        int activity = select(max_sd + 1, &read_fds, NULL, NULL, NULL);
+
+        if ((activity < 0) && (errno != EINTR)) {
+            perror("Select error");
         }
-        const char *hello = "Hello from the server"; //IMPORTANT! WE WILL GET TO IT
-        write(new_socket , hello , strlen(hello));
-        close(new_socket);
+
+        if (FD_ISSET(server_fd, &read_fds)) {  //checks if the server socket (server_fd) is ready for reading, which means there's an incoming connection request from a client.
+            int new_socket;
+            socklen_t addrlen = sizeof(address);
+            if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0) {
+                perror("Accept error");
+                exit(EXIT_FAILURE);
+            } // is used to accept this incoming connection. It creates a new socket descriptor (new_socket) for this specific client connection. The client's address information is stored in address.
+
+            for (int i = 0; i < MAX_CLIENTS; i++) {
+                if (client_socket[i] == 0) {
+                    client_socket[i] = new_socket;
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            int sd = client_socket[i];
+            if (FD_ISSET(sd, &read_fds))
+            {
+                char buffer[1024] = {0};
+                Request request;
+                int valread = read(sd, buffer, 1024);
+                if (valread < 0) {
+                    perror("Read error");
+                }
+                request.parseHttpRequest(buffer, sd);
+                std::cout << request.getMethod()<< std::endl;
+                std::cout << request.getPath() << std::endl;
+                std::cout << request.getHttpVersion() << std::endl;
+                printf("%s\n", buffer);
+                const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+                write(sd, hello, strlen(hello));
+                close(sd);
+                client_socket[i] = 0;
+            }
+        }
     }
     return 0;
 }
+// It uses select() to efficiently manage multiple client connections, and it maintains an array of client socket descriptors to keep track of active connections. When a client sends a request, it is parsed and processed, and a response is sent back to the client.

@@ -6,11 +6,13 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:34:48 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/04 17:35:14 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/05 09:49:43 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+
+#include "../Webserv.hpp"
 
 class Response
 {
