@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:22:08 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/05 12:19:36 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/05 17:18:27 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 //     public:
 //         typedef void (Location::*methods)(std::string);
 //     private:
-//         std::string                        _pattren;
+//         std::string                        _pattern;
 //         std::vector<std::string>           _limit_except;
 //         std::map<std::string, std::string> _cgi;
 //         std::string                        _upload;

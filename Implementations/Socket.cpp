@@ -6,20 +6,18 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:12:03 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/05 16:39:05 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/06 11:52:30 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Socket.hpp"
 
-#define PORT 8080 // Where the clients can reach at
-#define MAX_CLIENTS 10 // Maximum number of clients to handle
-
 int Socket::function() {
     int server_fd;
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) <= 0) {
         perror("Cannot create socket");
-        return 0;
+        // fprintf(stderr, "socket() failed. (%d)\n", GETSOCKETERRNO());
+        return 1;
     }
     //It creates a socket using socket() with the address family (AF_INET for IPv4) and socket type (SOCK_STREAM for a TCP socket). If socket() fails, it prints an error message using perror() and returns 0.
     struct sockaddr_in address; // is defined to store socket address information.
@@ -30,11 +28,13 @@ int Socket::function() {
 
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         perror("Bind failed");
-        return 0;
+        // fprintf(stderr, "bind() failed. (%d)\n", GETSOCKETERRNO());
+        return 1;
     } // binds the socket to the IP address and port defined in address
 
     if (listen(server_fd, MAX_CLIENTS) < 0) {
         perror("Listen failed");
+        // fprintf(stderr, "listen() failed. (%d)\n", GETSOCKETERRNO());
         exit(EXIT_FAILURE);
     } // listens for incoming connections on the server socket (server_fd).
     
@@ -77,21 +77,20 @@ int Socket::function() {
                 }
             }
         }
-
         for (int i = 0; i < MAX_CLIENTS; i++) {
             int sd = client_socket[i];
             if (FD_ISSET(sd, &read_fds))
             {
                 char buffer[1024] = {0};
                 Request request;
-                int valread = read(sd, buffer, 1024);
-                if (valread < 0) {
+                int valread = recv(sd, buffer, 1024, 0);
+                if (valread <= 0) {
                     perror("Read error");
                 }
                 request.parseHttpRequest(buffer, sd);
-                std::cout << request.getMethod()<< std::endl;
-                std::cout << request.getPath() << std::endl;
-                std::cout << request.getHttpVersion() << std::endl;
+                // std::cout << request.getMethod()<< std::endl;
+                // std::cout << request.getPath() << std::endl;
+                // std::cout << request.getHttpVersion() << std::endl;
                 printf("%s\n", buffer);
                 const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
                 write(sd, hello, strlen(hello));
@@ -103,3 +102,6 @@ int Socket::function() {
     return 0;
 }
 // It uses select() to efficiently manage multiple client connections, and it maintains an array of client socket descriptors to keep track of active connections. When a client sends a request, it is parsed and processed, and a response is sent back to the client.
+
+//page 76 !!!! chapter 2
+//page 215 !!! chapter 7

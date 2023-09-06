@@ -9,7 +9,6 @@ server {
 		allow_methods POST GET
 		root ./www/
 		autoindex on
-
 	}		
 
 	location 	/gym
