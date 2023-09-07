@@ -6,11 +6,28 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:12:03 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/06 11:52:30 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/07 11:16:45 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Socket.hpp"
+
+void Socket::setnonblocking(int *sock)
+{
+	int opts;
+
+	opts = fcntl(*sock,F_GETFL);
+	if (opts < 0) {
+		perror("fcntl(F_GETFL)");
+		exit(EXIT_FAILURE);
+	}
+	opts = (opts | O_NONBLOCK);
+	if (fcntl(*sock,F_SETFL,opts) < 0) {
+		perror("fcntl(F_SETFL)");
+		exit(EXIT_FAILURE);
+	}
+	return ;
+}
 
 int Socket::function() {
     int server_fd;
@@ -31,7 +48,7 @@ int Socket::function() {
         // fprintf(stderr, "bind() failed. (%d)\n", GETSOCKETERRNO());
         return 1;
     } // binds the socket to the IP address and port defined in address
-
+    setnonblocking(&server_fd);
     if (listen(server_fd, MAX_CLIENTS) < 0) {
         perror("Listen failed");
         // fprintf(stderr, "listen() failed. (%d)\n", GETSOCKETERRNO());
@@ -40,6 +57,7 @@ int Socket::function() {
     
     int client_socket[MAX_CLIENTS] = {0}; // store client socket descriptors. It is initialized to all zeros.
     fd_set read_fds; //fd_set is a data structure used to manage file descriptors for I/O operations.
+    // Fill up a fd_set structure with the file descriptors you want to know when data comes in on.
     int max_sd; //will store the maximum file descriptor value for use in select()
 
     while (1) {
@@ -57,7 +75,7 @@ int Socket::function() {
         }
 
         int activity = select(max_sd + 1, &read_fds, NULL, NULL, NULL);
-
+        
         if ((activity < 0) && (errno != EINTR)) {
             perror("Select error");
         }
@@ -69,7 +87,7 @@ int Socket::function() {
                 perror("Accept error");
                 exit(EXIT_FAILURE);
             } // is used to accept this incoming connection. It creates a new socket descriptor (new_socket) for this specific client connection. The client's address information is stored in address.
-
+            setnonblocking(&new_socket);
             for (int i = 0; i < MAX_CLIENTS; i++) {
                 if (client_socket[i] == 0) {
                     client_socket[i] = new_socket;
@@ -95,6 +113,7 @@ int Socket::function() {
                 const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
                 write(sd, hello, strlen(hello));
                 close(sd);
+                std::cout << request.getResponseStatus() << std::endl;
                 client_socket[i] = 0;
             }
         }

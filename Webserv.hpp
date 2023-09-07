@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 12:25:03 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/05 17:08:53 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/07 12:13:55 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,3 +43,5 @@
 #include <sys/select.h>  // For the select function
 #include <algorithm>
 #include <string>        // For string manipulation
+#include <exception>
+#include <climits>
