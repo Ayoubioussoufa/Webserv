@@ -11,6 +11,7 @@ all: $(NAME)
 
 $(NAME): $(OBJ)
 	$(CC) $(CPPFLAGS) $(OBJ) -o $(NAME)
+	$(RM) $(OBJ)
 
 clean:
 	$(RM) $(OBJ)

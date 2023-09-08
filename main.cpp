@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 12:25:06 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/04 17:34:03 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/08 10:08:02 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,25 +21,15 @@ int main(int ac, char *av[])
         std::cerr << "Usage: " << av[0] << " [configuration_file]" << std::endl;
         return 1; // Exit with an error code
     }
-    else if (ac == 2)
+    ConfigFile configFile;
+    if (ac == 1)
     {
-        ConfigFile configFile;
-        configFile.opening(av[1]);
-        for (std::map<std::string, std::vector<std::string> >::iterator it = configFile.config.begin(); it != configFile.config.end(); it++) {
-            std::cout << it->first << "   ";
-            // for (size_t i = 0; i < it->second.size(); i++) {
-            //     std::cout << it->second[i] << " ";
-            // }
-            std::cout << std::endl;
-        }
-        std::cout << "------------------" << std::endl;
-        Socket s;
-        s.function();
+        const char *file = "defaultconf_file";
+        configFile.opening(file);
     }
     else
-    {
-        ;
-        //parse default path
-    }
+        configFile.opening(av[1]);
+    Socket s;
+    s.function();
     return 0;
 }

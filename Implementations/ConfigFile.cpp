@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/04 17:33:52 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/08 10:02:44 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 //testing !!
 
-int    ConfigFile::opening(char *file)
+int    ConfigFile::opening(const char *file)
 {
     std::ifstream File(file);
     if (!File.is_open()) {

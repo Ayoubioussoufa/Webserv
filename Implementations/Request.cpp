@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:27:53 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/07 12:19:25 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/08 10:10:24 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,11 @@ void Request::parseHttpRequest(const std::string& requestBuffer, int new_socket)
     bool isContentLengthFound = false;
     std::size_t contentLength = 0;
     // Read and parse headers
-    while (std::getline(requestStream, line, '\n') && !line.empty()) {
+    while (std::getline(requestStream, line) && !line.empty()) {
         forBody += line + "\n";
+        // size_t poss = line.find("\r");
+        // if (poss != std::string::npos)
+        //     line = line.substr(0, poss);
         size_t pos = line.find(":");
         if (pos != std::string::npos) {
             std::string headerName = line.substr(0, pos);
@@ -59,27 +62,31 @@ void Request::parseHttpRequest(const std::string& requestBuffer, int new_socket)
                     const char* headerValueCStr = headerValue.c_str();
                     unsigned long parsedContentLength = strtoul(headerValueCStr, &endptr, 10);
 
-                    if (endptr == headerValueCStr || *endptr != '\0' || parsedContentLength == ULONG_MAX) {
+                    if (parsedContentLength == ULONG_MAX) { /*endptr == headerValueCStr || *endptr != '\0' || */
                         // Handle invalid Content-Length value
-                        setResponseStatus("400 Bad Request--");
+                        setResponseStatus("400 Bad Request");
                         return;
                     }
                     contentLength = parsedContentLength;
                     isContentLengthFound = true;
                 } catch (const std::exception& e) {
                     // Handle invalid Content-Length value
-                    setResponseStatus("400 Bad Request*");
+                    setResponseStatus("400 Bad Request");
                     return;
                 }
             }
         }
     }
-    std::cout << "******************************" << std::endl;
-    for (std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); ++it) {
-            std::cout << it->first << it->second;
-    }
-    std::cout << std::endl;
-    std::cout << "******************************" << std::endl;
+    // std::cout << "******************************" << std::endl;
+    // std::cout << _header.size() << std::endl;
+    // std::cout << "******************************" << std::endl;
+    // for (std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); ++it) {
+    //         std::cout << it->first << it->second << std::endl;
+    // }
+    // std::cout << std::endl;
+    // std::cout << "******************************" << std::endl;
+    // std::cout << forBody << std::endl;
+    // std::cout << "******************************" << std::endl;
     (void)new_socket;
     if (_method == "POST") {
         if (!isContentLengthFound) {
@@ -92,7 +99,8 @@ void Request::parseHttpRequest(const std::string& requestBuffer, int new_socket)
         // Extract the body
             std::string requestBody = forBody.substr(bodyPos + 4);
         // Write the body to a file
-            std::ofstream outfile("BodyOfRequest.txt", std::ofstream::binary);
+            _bodyFile = "BodyOfRequest.txt";
+            std::ofstream outfile(_bodyFile, std::ofstream::binary);
             outfile.write(requestBody.c_str(), contentLength);
             outfile.close();
         }
@@ -102,30 +110,7 @@ void Request::parseHttpRequest(const std::string& requestBuffer, int new_socket)
             return ;
         }
     }
-            // const char* contentLengthStr = _header["Content-Length"].c_str();
-            // int contentLength = atoi(contentLengthStr);
-            // char* buffer = new char[contentLength];
-            // int bytesRead = 0;
-            // int totalBytesRead = 0;
-            // while (totalBytesRead < contentLength) {
-            //     bytesRead = recv(new_socket, buffer + totalBytesRead, contentLength - totalBytesRead, 0);
-            //     if (bytesRead <= 0) {
-            //         perror("Read error");
-            //         setResponseStatus("500 Internal Server Error");
-            //         delete[] buffer;
-            //         return;
-            //     }
-            //     totalBytesRead += bytesRead;
-            //     std::cout << "Received " << totalBytesRead << " bytes out of " << contentLength << std::endl;
-            // }
-            // int bytesRead = recv(new_socket, buffer, contentLength, 0);
-            // if (bytesRead < 0 || (bytesRead != contentLength && bytesRead != 0)) {
-            //     // Handle an error reading the request body
-            //     setResponseStatus("500 Internal Server Error");
-            //     delete[] buffer;
-            //     return ;
     setResponseStatus("200 OK");
-    return ;
 }
 
 std::string Request::getPath() const

@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:07:10 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/05 14:53:53 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/08 10:10:43 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ class Request
         std::string     _httpVersion;
         std::string     _responseStatus;
         std::map<std::string, std::string> _header;
-        //std::map<std::string, std::string> _body;
+        const char*     _bodyFile;
     public:
         Request();
         void parseHttpRequest(const std::string& requestBuffer, int new_socket);

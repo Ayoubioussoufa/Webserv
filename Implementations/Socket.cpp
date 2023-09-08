@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:12:03 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/07 11:16:45 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/08 10:51:20 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,12 @@ int Socket::function() {
         // fprintf(stderr, "socket() failed. (%d)\n", GETSOCKETERRNO());
         return 1;
     }
+    int opt = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
+
     //It creates a socket using socket() with the address family (AF_INET for IPv4) and socket type (SOCK_STREAM for a TCP socket). If socket() fails, it prints an error message using perror() and returns 0.
     struct sockaddr_in address; // is defined to store socket address information.
     memset((char *)&address, 0, sizeof(address));
@@ -124,3 +130,5 @@ int Socket::function() {
 
 //page 76 !!!! chapter 2
 //page 215 !!! chapter 7
+
+// https://www.ibm.com/docs/en/i/7.2?topic=designs-example-nonblocking-io-select
