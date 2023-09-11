@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 12:25:03 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/07 13:46:33 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/11 10:05:47 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,19 @@
 #include <map>
 #include <vector>
 #include <sstream>
-#include "./Includes/Socket.hpp"
-#include "./Includes/Request.hpp"
-#include "./Includes/CommonEntity.hpp"
-#include "./Includes/ConfigFile.hpp"
-#include "./Includes/Configuration.hpp"
-#include "./Includes/Location.hpp"
-#include "./Includes/Request.hpp"
-#include "./Includes/Response.hpp"
+// #include "./Includes/Socket.hpp"
+// #include "./Includes/CommonEntity.hpp"
+// #include "./Includes/ConfigFile.hpp"
+// #include "./Includes/Configuration.hpp"
+// #include "./Includes/Location.hpp"
+// #ifndef REQUEST_HPP
+// #define REQUEST_HPP
+// #include "./Includes/Request.hpp"
+// #endif
+// #ifndef RESPONSE_HPP
+// #define RESPONSE_HPP
+// #include "./Includes/Response.hpp"
+// #endif
 #include <stdlib.h>
 #include <sys/time.h>
 #include <sys/types.h>
