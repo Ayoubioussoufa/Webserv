@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:27:48 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/11 10:36:40 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/11 17:28:29 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,15 @@ void    Response::Function()
     // ! the structure of it
     if (_method == "GET")
     {
-        ;
+        if (_path) {
+            if () { /*Im gonna search if the path is on the configfile*/
+                ;
+            } else {
+                return setResponseStatus("404 Not Found Response.");
+            }
+        } else {
+            return setResponseStatus("400 Bad Request Response.");
+        }
     }
     else if (_method == "POST")
     {

@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:09:26 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/11 16:38:12 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/11 16:39:07 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class location
         void Setlocation();
 };
 
-class Confige
+class Config
 {
     private :
         std::vector<std::map<std::string, int>> error_page;
