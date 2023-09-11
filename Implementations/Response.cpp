@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:27:48 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/11 10:18:05 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/11 10:36:40 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,18 +43,18 @@ void    Response::Function()
     {
         ;
     }
-    // else if (_method == "POST")
-    // {
-    //     ;
-    // }
-    // else if (_method == "DELETE")
-    // {
-    //     ;
-    // }
-    // else
-    // {
-    //     ;
-    // }
+    else if (_method == "POST")
+    {
+        ;
+    }
+    else if (_method == "DELETE")
+    {
+        ;
+    }
+    else
+    {
+        ;
+    }
 
     // for (std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); it++)
     // {
