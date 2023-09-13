@@ -3,29 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   CommonEntity.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:25:46 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/13 10:42:31 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/13 14:48:02 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/CommonEntity.hpp"
-
-// CommonEntity::CommonEntity();
-// CommonEntity::CommonEntity(TokenVectsIter begin, TokenVectsIter end);
-// CommonEntity::CommonEntity(const CommonEntity& other);
-// CommonEntity& CommonEntity::operator=(const CommonEntity& other);
-// void    CommonEntity::InitRoot(std::string value);
-// void    CommonEntity::InitIndex(std::string value);
-// void    CommonEntity::InitErrorPage(std::string value);
-// void    CommonEntity::InitClienBodySize(std::string value);
-// void    CommonEntity::InitAutoIndex(std::string value);
-// std::strCommonEntity::getRoot() const;
-// std::vector<std::string>     CommonEntity::getIndex() const;
-// std::map<int, std::string>   CommonEntity::getErrorPages() const;
-// size_t  CommonEntity::getClientMaxBodySize() const;
-// bool    CommonEntity::getAutoIndex() const;
 
 CommonEntity::CommonEntity() : _client_max_body_size(0), _AutoIndex(false), _root_exists(false) {}
 
@@ -114,17 +99,13 @@ void CommonEntity::InitAutoIndex(std::string value)
     // You would need to parse and store the flag based on your needs.
 
     // Convert the input string to lowercase for case-insensitive comparison
-    std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+    std::transform(value.begin(), value.end(), value.begin(), std::tolower);
 
     // Check if the value is "true" or "false"
     if (value == "true")
-    {
         _AutoIndex = true;
-    }
     else if (value == "false")
-    {
         _AutoIndex = false;
-    }
     else
     {
         // Handle parsing error if needed

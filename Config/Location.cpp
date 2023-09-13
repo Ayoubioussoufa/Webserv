@@ -3,95 +3,78 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:06 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/13 10:56:20 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/13 18:58:04 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Location.hpp"
 
-// Location::Location();
-// Location::Location(const CommonEntity& base, TokenVectsIter& begin, TokenVectsIter& end);
-// Location::Location(const Location& other);
-// Location&                    Location::operator=(const Location& other);
-// void                         Location::InitPattern(std::string value);
-// void                         Location::InitLimitExcept(std::string value);
-// void                         Location::InitCgi(std::string value);
-// void                         Location::InitUpload(std::string value);
-// void                         Location::InitRedirect(std::string value);
-// std::string                  Location::getPattren() const;
-// std::vector<std::string>     Location::getLimit_except() const;
-// std::map<std::string, std::string>             Location::getCgi() const;
-// std::string                  Location::getUpload() const;
-// std::string                  Location::getRedirect() const;
-// Location::~Location();
-// friend std::ostream& Location::operator<<(std::ostream& o, Location obj);
-
 Location::Location() : _pattern_exists(false) {}
 // !
-Location::Location(const CommonEntity& base, TokenVectsIter& begin, TokenVectsIter& end)
-    : CommonEntity(base), _pattern_exists(false)
-{
-    // Initialize the Location object using the provided iterators (assuming they point to strings).
-    // This is a simplified example; you should adapt it based on your configuration format.
-    while (begin != end)
-    {
-        std::string token = *begin;
-        if (token == "pattern")
-        {
-            // Extract and set the pattern
-            ++begin;
-            if (begin != end)
-            {
-                InitPattern(*begin);
-            }
-        }
-        else if (token == "limit_except")
-        {
-            // Extract and set limit_except values
-            ++begin;
-            while (begin != end && *begin != ";")
-            {
-                InitLimitExcept(*begin);
-                ++begin;
-            }
-        }
-        else if (token == "cgi")
-        {
-            // Extract and set CGI settings
-            ++begin;
-            if (begin != end)
-            {
-                InitCgi(*begin);
-            }
-        }
-        else if (token == "upload")
-        {
-            // Extract and set upload
-            ++begin;
-            if (begin != end)
-            {
-                InitUpload(*begin);
-            }
-        }
-        else if (token == "redirect")
-        {
-            // Extract and set redirect
-            ++begin;
-            if (begin != end)
-            {
-                InitRedirect(*begin);
-            }
-        }
-        // Handle other tokens as needed
-        ++begin;
-    }
-}
+// Location::Location(const CommonEntity& base, TokenVectsIter& begin, TokenVectsIter& end)
+//     : CommonEntity(base), _pattern_exists(false)
+// {
+//     // Initialize the Location object using the provided iterators (assuming they point to strings).
+//     // This is a simplified example; you should adapt it based on your configuration format.
+//     while (begin != end)
+//     {
+//         std::string token = *begin;
+//         if (token == "pattern")
+//         {
+//             // Extract and set the pattern
+//             ++begin;
+//             if (begin != end)
+//             {
+//                 InitPattern(*begin);
+//             }
+//         }
+//         else if (token == "limit_except")
+//         {
+//             // Extract and set limit_except values
+//             ++begin;
+//             while (begin != end && *begin != ";")
+//             {
+//                 InitLimitExcept(*begin);
+//                 ++begin;
+//             }
+//         }
+//         else if (token == "cgi")
+//         {
+//             // Extract and set CGI settings
+//             ++begin;
+//             if (begin != end)
+//             {
+//                 InitCgi(*begin);
+//             }
+//         }
+//         else if (token == "upload")
+//         {
+//             // Extract and set upload
+//             ++begin;
+//             if (begin != end)
+//             {
+//                 InitUpload(*begin);
+//             }
+//         }
+//         else if (token == "redirect")
+//         {
+//             // Extract and set redirect
+//             ++begin;
+//             if (begin != end)
+//             {
+//                 InitRedirect(*begin);
+//             }
+//         }
+//         // Handle other tokens as needed
+//         ++begin;
+//     }
+// }
 
 Location::Location(const Location& other)
-    : CommonEntity(other), _pattern(other._pattern),
+    : _pattern(other._pattern),
       _limit_except(other._limit_except),
       _cgi(other._cgi), _upload(other._upload),
       _redirect(other._redirect),
@@ -101,7 +84,6 @@ Location& Location::operator=(const Location& other)
 {
     if (this != &other)
     {
-        CommonEntity::operator=(other);
         _pattern = other._pattern;
         _limit_except = other._limit_except;
         _cgi = other._cgi;
@@ -164,7 +146,7 @@ void Location::InitRedirect(std::string value)
     _redirect = value;
 }
 
-std::string Location::getPattren() const
+std::string Location::getpattern() const
 {
     return _pattern;
 }
@@ -191,15 +173,15 @@ std::string Location::getRedirect() const
 
 Location::~Location() {}
 
-friend std::ostream& operator<<(std::ostream& o, const Location obj);
+// friend std::ostream& operator<<(std::ostream& o, const Location obj);
 
-std::ostream& operator<<(std::ostream& o, const Location obj)
-{
-    o << "Pattern: " << obj._pattern << std::endl;
-    o << "Root: " << obj.getRoot() << std::endl;
-    o << "Index: ";
-    std::copy(obj.getIndex().begin(), obj.getIndex().end(), std::ostream_iterator<std::string>(o, ", "));
-    o << std::endl;
-    // Output other members as needed
-    return o;
-}
+// std::ostream& operator<<(std::ostream& o, const Location obj)
+// {
+//     o << "Pattern: " << obj._pattern << std::endl;
+//     o << "Root: " << obj.getRoot() << std::endl;
+//     o << "Index: ";
+//     std::copy(obj.getIndex().begin(), obj.getIndex().end(), std::ostream_iterator<std::string>(o, ", "));
+//     o << std::endl;
+//     // Output other members as needed
+//     return o;
+// }

@@ -2,8 +2,9 @@ NAME = webserv
 CC = c++
 RM = rm -f
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98
-IMPLEMENTATIONS = Socket.cpp ConfigFile.cpp Request.cpp Response.cpp
-SRCS = $(addprefix ./Implementations/, $(IMPLEMENTATIONS)) \
+# IMPLEMENTATIONS = Socket.cpp Request.cpp Response.cpp $(addprefix ./Implementations/, $(IMPLEMENTATIONS))
+CONFIG = Servers.cpp Configuration.cpp Location.cpp
+SRCS = $(addprefix ./Config/, $(CONFIG)) \
 		main.cpp
 OBJ = $(SRCS:.cpp=.o)
 

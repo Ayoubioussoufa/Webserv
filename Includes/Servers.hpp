@@ -1,22 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Response.hpp                                       :+:      :+:    :+:   */
+/*   Servers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/09/04 17:34:48 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/13 18:10:45 by aybiouss         ###   ########.fr       */
+/*   Created: 2023/09/13 14:54:36 by aybiouss          #+#    #+#             */
+/*   Updated: 2023/09/13 19:52:23 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "Request.hpp"
+#include "Configuration.hpp"
 
-// class Response : public Request
-// {
-//     public:
-//         void    Function();
-//         const char* get_content_type(const char* path);
-// };
+class Servers
+{
+    private:
+        std::vector<Configuration>   _servers;
+    public:
+        Servers() {};
+        int    ConfigFileParse(std::string file);
+        ~Servers() {};
+};
