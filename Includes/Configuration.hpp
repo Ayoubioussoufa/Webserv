@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:22:39 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/14 12:04:19 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/14 17:25:17 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,20 +24,21 @@ class Configuration
     private:
         std::string                                      _root;
         std::string                                      _host;
-        std::vector<std::string>                         _index; // ! TOCHANGE KIKOUN AWA7D
+        std::string                                      _index;
         std::map<int, std::string>                       _error_pages;
         size_t                                           _client_max_body_size;
         bool                                             _AutoIndex;
-        bool                                             _root_exists; //?
+        bool                                             _root_exists;
         std::string                                      _port;
         bool                                             _host_exists;
         bool                                             _port_exists;
+        std::string                                      _upload;
         std::string                                      _server_name;                                   
         std::vector<Location>                            _locations;
     public:
         Configuration();
         // Configuration operator()(std::string host, std::string  port);
-        Configuration(TokenVectsIter begin, TokenVectsIter end);
+        Configuration(std::vector<std::string> vecteur);
         std::vector<std::string>    Tokenization(std::string line);
         Configuration(const Configuration& other);
         Configuration& operator=(const Configuration& other);
@@ -48,10 +49,12 @@ class Configuration
         void                         InitRoot(std::string value);
         void                         InitIndex(std::string value);
         void                         InitErrorPage(std::string code, std::string path);
-        void                         InitClienBodySize(std::string value);
+        void                         InitClientBodySize(std::string value);
         void                         InitAutoIndex(std::string value);
+        void                         InitUpload(std::string value);
+        std::string                  getUpload() const;
         std::string                  getRoot() const;
-        std::vector<std::string>     getIndex() const;
+        std::string                  getIndex() const;
         std::map<int, std::string>   getErrorPages() const;
         size_t                       getClientMaxBodySize() const;
         bool                         getAutoIndex() const;

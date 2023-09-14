@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/14 12:04:51 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/14 17:23:40 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,14 +22,8 @@ std::vector<std::string>    Configuration::Tokenization(std::string line)
     std::istringstream iss(line);
     std::string token;
     
-    while (std::getline(iss, line)) {
-        std::istringstream line_stream(line);
-        std::string token;
-        while (std::getline(line_stream, token, ' ') || std::getline(line_stream, token, '\t')) {
-            if (!token.empty()) {
-                result.push_back(token);
-            }
-        }
+    while (iss >> token) {
+        result.push_back(token);
     }
     return result;
 }
@@ -42,10 +36,12 @@ bool Configuration::isStringAllDigits(const std::string& str) {
     return (pos == std::string::npos);
 }
 
-Configuration::Configuration(TokenVectsIter begin, TokenVectsIter end)
+Configuration::Configuration(std::vector<std::string> vecteur)
     : _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
     _host_exists(false), _port_exists(false)
 {
+    TokenVectsIter begin = vecteur.begin();
+    TokenVectsIter end = vecteur.end();
     while (begin != end)
     {
         std::string line = *begin;
@@ -55,13 +51,45 @@ Configuration::Configuration(TokenVectsIter begin, TokenVectsIter end)
             ++begin;
             InitHost(token[1]);
         }
+        else if (token[0] == "autoindex")
+        {
+            ++begin;
+            if (begin != end && token.size() == 2)
+                InitAutoIndex(token[1]);
+            else
+                throw std::string("Invalid autoindex");
+        }
+        else if (token[0] == "index")
+        {
+            ++begin;
+            if (begin != end && token.size() == 2)
+                InitIndex(token[1]);
+            else
+                throw std::string("Invalid Index");
+        }
+        else if (token[0] == "client_body_size")
+        {
+            ++begin;
+            if (begin != end && token.size() == 2)
+                InitClientBodySize(token[1]);
+            else
+                throw std::string("Invalid Client body size");
+        }
+        else if (token[0] == "root")
+        {
+            ++begin;
+            if (begin != end && token.size() == 2)
+                InitRoot(token[1]);
+            else
+                throw std::string("Invalid root");
+        }
         else if (token[0] == "listen")
         {
             ++begin;
             if (isStringAllDigits(token[1]) && token.size() == 2 && atoi(token[1].c_str()) <= 65635)
                 InitPort(token[1]);
             else
-                throw std::string("Invalid port number"); // !error in config file
+                throw std::string("Invalid port number");
         }
         else if (token[0] == "server_name")
         {
@@ -70,6 +98,15 @@ Configuration::Configuration(TokenVectsIter begin, TokenVectsIter end)
                 InitServerName(token[1]);
             else
                 throw std::string("Invalid server name"); //! error
+        }
+        else if (token[0] == "upload_path")
+        {
+            // Extract and set upload
+            ++begin;
+            if (token.size() == 2 && begin != end)
+                InitUpload(token[1]);
+            else
+                throw std::string("Invalid Upload path");
         }
         else if (token[0] == "error_page")
         {
@@ -87,20 +124,18 @@ Configuration::Configuration(TokenVectsIter begin, TokenVectsIter end)
                 // Find the closing curly brace of the location block.
                 TokenVectsIter endIt = std::find(begin, end, "}");
                 // Create a Location object and add it to the vector.
-                Location location(begin, endIt);
+                Location location(token[1], begin, endIt);
                 _locations.push_back(location);
                 // Move the iterator to the next position after the location block.
-                begin = endIt + 1;
+                begin = endIt;
             }
             else
                 throw std::string("Invalid location !"); //!error
         }
         else
             ++begin;
-        // !... LIST GOES ON
     }
 }
-// ! PAUSE HNAYA !!!!! 
 
 Configuration::Configuration(const Configuration& other)
     : _root(other._root), _host(other._host), _index(other._index),
@@ -151,9 +186,10 @@ void Configuration::InitRoot(std::string value)
     _root = value;
     _root_exists = true;
 }
+
 void Configuration::InitIndex(std::string value)
 {
-    _index.push_back(value);
+    _index = value;
 }
 
 void Configuration::InitErrorPage(std::string code, std::string path)
@@ -162,7 +198,7 @@ void Configuration::InitErrorPage(std::string code, std::string path)
     // You would need to parse and store error pages based on your needs.
     int error_code = atoi(code.c_str());
     std::string error_page_path = path;
-    if (error_code >= 100 && error_code <= 599)
+    if ((error_code >= 100 && error_code <= 599) && !path.empty())
     {
         // Store the parsed values in the _error_pages map
         _error_pages[error_code] = error_page_path;
@@ -172,30 +208,32 @@ void Configuration::InitErrorPage(std::string code, std::string path)
         // Handle parsing error if needed
         std::string str = "Error parsing error page: " + code + " ";
         throw std::string(str.append(path));
-        // ! throw exception ?
     }
 }
 
-void Configuration::InitClienBodySize(std::string value)
+void Configuration::InitClientBodySize(std::string value)
 {
-    // Implement this method to initialize client max body size.
-    // You would need to parse and store the size based on your needs.
-
-    // Parse the input string as an integer
+    // Use a stringstream to parse the input string as an integer
     std::istringstream iss(value);
-    size_t client_max_body_size;
-    if (iss >> client_max_body_size)
+    int client_max_body_size = 0;
+
+    // Attempt to extract an integer from the string
+    if (!(iss >> client_max_body_size))
     {
-        // Store the parsed value in the _client_max_body_size member
-        _client_max_body_size = client_max_body_size;
+        // Handle parsing error if the extraction fails
+        std::string error_msg = "Error parsing client max body size: " + value;
+        throw std::string(error_msg);
     }
-    else
+
+    // Check if the parsed value is valid (greater than zero)
+    if (client_max_body_size < 0)
     {
-        // Handle parsing error if needed
-        std::string str = "Error parsing client max body size: ";
-        throw std::string(str.append(value));
-        // ! throw exception ?
+        std::string error_msg = "Invalid client max body size: " + value;
+        throw std::string(error_msg);
     }
+
+    // Store the parsed value in the _client_max_body_size member
+    _client_max_body_size = static_cast<size_t>(client_max_body_size);
 }
 
 void Configuration::InitAutoIndex(std::string value)
@@ -214,9 +252,19 @@ void Configuration::InitAutoIndex(std::string value)
     else
     {
         // Handle parsing error if needed
-        std::cerr << "Error parsing AutoIndex: " << value << std::endl;
-        // ! throw exception ?
+        std::string error_msg = "Error parsing AutoIndex: " + value;
+        throw std::string(error_msg);
     }
+}
+
+void Configuration::InitUpload(std::string value)
+{
+    _upload = value;
+}
+
+std::string Configuration::getUpload() const
+{
+    return _upload;
 }
 
 std::string Configuration::getRoot() const
@@ -224,7 +272,7 @@ std::string Configuration::getRoot() const
     return _root;
 }
 
-std::vector<std::string> Configuration::getIndex() const
+std::string Configuration::getIndex() const
 {
     return _index;
 }
@@ -266,7 +314,7 @@ std::vector<Location> Configuration::getLocations() const
 
 // friend std::ostream& operator<<(std::ostream& o, const Configuration obj);
 
-std::ostream& operator<<(std::ostream& o, const Configuration obj)
+std::ostream& operator<<(std::ostream& o, Configuration obj)
 {
     o << "Host: " << obj.getHost() << std::endl;
     o << "Port: " << obj.getPort() << std::endl;
@@ -274,12 +322,9 @@ std::ostream& operator<<(std::ostream& o, const Configuration obj)
     
     // Output location blocks
     std::vector<Location> locations = obj.getLocations();
-    for (size_t i = 0; i < locations.size(); ++i)
-    {
-        o << "Location Pattern: " << locations[i].getpattern() << std::endl;
-        // Output other location properties as needed
+    for (std::vector<Location>::const_iterator it = locations.begin(); it != locations.end(); ++it) {
+        std::cout << *it << std::endl;
     }
-    
     return o;
 }
 // This code defines the Configuration class with member functions for initialization and access to its attributes. It also handles parsing location blocks and uses the Location class to store and manage them.

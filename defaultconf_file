@@ -1,4 +1,5 @@
 server {
+	token	5
 	listen 		8000
 	error_page 	404 www/pages_error/404.html 403 www/pages_error/403.html 405 www/pages_error/405.html
 	upload_path 	www/Upload

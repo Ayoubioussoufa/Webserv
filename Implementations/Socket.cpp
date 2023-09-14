@@ -6,11 +6,12 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:12:03 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/11 10:12:00 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/14 15:57:48 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Socket.hpp"
+#include "../Includes/Response.hpp"
 
 void Socket::setnonblocking(int *sock)
 {
@@ -119,7 +120,7 @@ int Socket::function() {
                 const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
                 write(sd, hello, strlen(hello));
                 close(sd);
-                std::cout << response.getResponseStatus() << std::endl;
+                // std::cout << response.getResponseStatus() << std::endl;
                 std::cout << "--------------------" << std::endl;
                 response.Function();
                 std::cout << "--------------------" << std::endl;

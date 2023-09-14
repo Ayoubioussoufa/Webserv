@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/14 12:20:22 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/14 13:03:36 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int Servers::ConfigFileParse(std::string file)
                 {
                     insideServerBlock = false;  // Stop when we encounter the closing curly brace
                     // hna ndwz string kamlo (block) bach itparsa f configuration onmchi n9lb 3la next server f configfile
-                    Configuration config(block.begin(), block.end());
+                    Configuration config(block);
                     _servers.push_back(config);
                     for (size_t i = 0; i < block.size(); ++i) {
                         std::cout << block[i] << std::endl;

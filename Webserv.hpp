@@ -6,13 +6,13 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 12:25:03 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/13 19:09:47 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/14 15:59:04 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#define PORT 80 // Where the clients can reach at
+#define PORT 8080 // Where the clients can reach at
 #define MAX_CLIENTS 10 // Maximum number of clients to handle
 
 #include <vector>
@@ -33,6 +33,7 @@
 // #define RESPONSE_HPP
 // #include "./Includes/Response.hpp"
 // #endif
+#include <sys/stat.h>
 #include <stack>
 #include <stdlib.h>
 #include <sys/time.h>
