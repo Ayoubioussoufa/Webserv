@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/13 19:58:04 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/14 12:20:22 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ int Servers::ConfigFileParse(std::string file)
     std::vector<std::string> block;
     std::stack<char> blockStack;// Stack to keep track of nested blocks
     while (std::getline(File, line))
-    {
+    { // ! ILA KAN STR KHAWI MATPUSHIHCH L VECTOR
         if (line == "server")
         {
             insideServerBlock = true;
@@ -51,6 +51,7 @@ int Servers::ConfigFileParse(std::string file)
                     for (size_t i = 0; i < block.size(); ++i) {
                         std::cout << block[i] << std::endl;
                     } //ghir bach nchofo
+                    std::cout << "--------------------" << std::endl;
                     block.clear(); // Clear the block for the next server
                 }
             }
@@ -60,4 +61,10 @@ int Servers::ConfigFileParse(std::string file)
     }
     File.close();
     return 0;
+}
+
+void Servers::printServerData() const {
+    for (std::vector<Configuration>::const_iterator it = _servers.begin(); it != _servers.end(); ++it) {
+        std::cout << *it << std::endl;
+    }
 }

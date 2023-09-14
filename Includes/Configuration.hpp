@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:22:39 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/13 19:58:41 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/14 12:04:19 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,15 +38,16 @@ class Configuration
         Configuration();
         // Configuration operator()(std::string host, std::string  port);
         Configuration(TokenVectsIter begin, TokenVectsIter end);
-        void initAttributes(TokenVectsIter begin, TokenVectsIter end);
+        std::vector<std::string>    Tokenization(std::string line);
         Configuration(const Configuration& other);
         Configuration& operator=(const Configuration& other);
+        bool isStringAllDigits(const std::string& str);
         void InitHost(std::string value);
         void InitPort(std::string value);
         void InitServerName(std::string value);
         void                         InitRoot(std::string value);
         void                         InitIndex(std::string value);
-        void                         InitErrorPage(std::string value);
+        void                         InitErrorPage(std::string code, std::string path);
         void                         InitClienBodySize(std::string value);
         void                         InitAutoIndex(std::string value);
         std::string                  getRoot() const;
@@ -59,7 +60,7 @@ class Configuration
         std::string                 getPort() const;
         std::string                 getServerNames() const;
         std::vector<Location>       getLocations() const;
-        // friend std::ostream& operator<<(std::ostream& o, Configuration obj);
+        friend std::ostream& operator<<(std::ostream& o, Configuration obj);
         ~Configuration();
 };
 

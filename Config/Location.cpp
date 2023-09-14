@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:06 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/13 18:58:04 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/14 10:05:56 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,64 +14,63 @@
 
 Location::Location() : _pattern_exists(false) {}
 // !
-// Location::Location(const CommonEntity& base, TokenVectsIter& begin, TokenVectsIter& end)
-//     : CommonEntity(base), _pattern_exists(false)
-// {
-//     // Initialize the Location object using the provided iterators (assuming they point to strings).
-//     // This is a simplified example; you should adapt it based on your configuration format.
-//     while (begin != end)
-//     {
-//         std::string token = *begin;
-//         if (token == "pattern")
-//         {
-//             // Extract and set the pattern
-//             ++begin;
-//             if (begin != end)
-//             {
-//                 InitPattern(*begin);
-//             }
-//         }
-//         else if (token == "limit_except")
-//         {
-//             // Extract and set limit_except values
-//             ++begin;
-//             while (begin != end && *begin != ";")
-//             {
-//                 InitLimitExcept(*begin);
-//                 ++begin;
-//             }
-//         }
-//         else if (token == "cgi")
-//         {
-//             // Extract and set CGI settings
-//             ++begin;
-//             if (begin != end)
-//             {
-//                 InitCgi(*begin);
-//             }
-//         }
-//         else if (token == "upload")
-//         {
-//             // Extract and set upload
-//             ++begin;
-//             if (begin != end)
-//             {
-//                 InitUpload(*begin);
-//             }
-//         }
-//         else if (token == "redirect")
-//         {
-//             // Extract and set redirect
-//             ++begin;
-//             if (begin != end)
-//             {
-//                 InitRedirect(*begin);
-//             }
-//         }
-//         // Handle other tokens as needed
-//         ++begin;
-//     }
-// }
+Location::Location(TokenVectsIter& begin, TokenVectsIter& end) : _pattern_exists(false)
+{
+    // Initialize the Location object using the provided iterators (assuming they point to strings).
+    // This is a simplified example; you should adapt it based on your configuration format.
+    while (begin != end)
+    {
+        std::string token = *begin;
+        if (token == "pattern")
+        {
+            // Extract and set the pattern
+            ++begin;
+            if (begin != end)
+            {
+                InitPattern(*begin);
+            }
+        }
+        else if (token == "limit_except")
+        {
+            // Extract and set limit_except values
+            ++begin;
+            while (begin != end && *begin != ";")
+            {
+                InitLimitExcept(*begin);
+                ++begin;
+            }
+        }
+        else if (token == "cgi")
+        {
+            // Extract and set CGI settings
+            ++begin;
+            if (begin != end)
+            {
+                InitCgi(*begin);
+            }
+        }
+        else if (token == "upload")
+        {
+            // Extract and set upload
+            ++begin;
+            if (begin != end)
+            {
+                InitUpload(*begin);
+            }
+        }
+        else if (token == "redirect")
+        {
+            // Extract and set redirect
+            ++begin;
+            if (begin != end)
+            {
+                InitRedirect(*begin);
+            }
+        }
+        // Handle other tokens as needed
+        ++begin;
+    }
+}
 
 Location::Location(const Location& other)
     : _pattern(other._pattern),

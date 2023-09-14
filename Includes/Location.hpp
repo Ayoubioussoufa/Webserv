@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:22:08 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/13 18:57:46 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/14 10:06:19 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class Location
         bool                               _pattern_exists;
     public:
         Location();
-        // Location(const CommonEntity& base, TokenVectsIter& begin, TokenVectsIter& end);
+        Location(TokenVectsIter& begin, TokenVectsIter& end);
         Location(const Location& other);
         Location& operator=(const Location& other);
         void                                InitPattern(std::string value);

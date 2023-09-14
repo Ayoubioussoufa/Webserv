@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/13 19:59:51 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/14 12:04:51 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,64 +16,91 @@ Configuration::Configuration()
         : _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
         _host_exists(false), _port_exists(false) {}
 
+std::vector<std::string>    Configuration::Tokenization(std::string line)
+{
+    std::vector<std::string> result;
+    std::istringstream iss(line);
+    std::string token;
+    
+    while (std::getline(iss, line)) {
+        std::istringstream line_stream(line);
+        std::string token;
+        while (std::getline(line_stream, token, ' ') || std::getline(line_stream, token, '\t')) {
+            if (!token.empty()) {
+                result.push_back(token);
+            }
+        }
+    }
+    return result;
+}
+
+bool Configuration::isStringAllDigits(const std::string& str) {
+    // Find the first character that is not a digit
+    size_t pos = str.find_first_not_of("0123456789");
+
+    // If pos is equal to std::string::npos, it means there are no non-digit characters
+    return (pos == std::string::npos);
+}
+
 Configuration::Configuration(TokenVectsIter begin, TokenVectsIter end)
     : _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
     _host_exists(false), _port_exists(false)
 {
-    initAttributes(begin, end);
-}
-// ! PAUSE HNAYA !!!!! 
-void Configuration::initAttributes(TokenVectsIter begin, TokenVectsIter end)
-{
     while (begin != end)
     {
-        std::string token = *begin;
-        if (token == "host")
+        std::string line = *begin;
+        std::vector<std::string> token = Tokenization(line);
+        if (token[0] == "host" && token.size() == 2)
         {
             ++begin;
-            if (begin != end)
-                InitHost(*begin);
+            InitHost(token[1]);
         }
-        else if (token == "port")
+        else if (token[0] == "listen")
         {
             ++begin;
-            if (begin != end)
-                InitPort(*begin);
+            if (isStringAllDigits(token[1]) && token.size() == 2 && atoi(token[1].c_str()) <= 65635)
+                InitPort(token[1]);
+            else
+                throw std::string("Invalid port number"); // !error in config file
         }
-        else if (token == "server_name")
+        else if (token[0] == "server_name")
         {
             ++begin;
-            if (begin != end)
-                InitServerName(*begin);
+            if (token.size() == 2)
+                InitServerName(token[1]);
+            else
+                throw std::string("Invalid server name"); //! error
         }
-        else if (token == "error_page")
+        else if (token[0] == "error_page")
         {
             ++begin;
-            if (begin != end)
-                InitErrorPage(*begin);
+            if (token.size() == 3)
+                InitErrorPage(token[1], token[2]);
+            else
+                throw std::string("Invalid error page arguments"); // ! error
         }
-        else if (token == "index")
+        else if (token[0] == "location")
         {
-            // Handle location blocks
             ++begin;
-            if (begin != end)
+            if (begin != end && token.size() == 2)
             {
                 // Find the closing curly brace of the location block.
                 TokenVectsIter endIt = std::find(begin, end, "}");
                 // Create a Location object and add it to the vector.
-                // Location location(*this, begin, endIt);
-                // _locations.push_back(location);
+                Location location(begin, endIt);
+                _locations.push_back(location);
                 // Move the iterator to the next position after the location block.
                 begin = endIt + 1;
             }
+            else
+                throw std::string("Invalid location !"); //!error
         }
         else
-        {
-            // Handle other configuration settings if needed.
             ++begin;
-        }
+        // !... LIST GOES ON
     }
 }
+// ! PAUSE HNAYA !!!!! 
 
 Configuration::Configuration(const Configuration& other)
     : _root(other._root), _host(other._host), _index(other._index),
@@ -129,16 +156,13 @@ void Configuration::InitIndex(std::string value)
     _index.push_back(value);
 }
 
-void Configuration::InitErrorPage(std::string value)
+void Configuration::InitErrorPage(std::string code, std::string path)
 {
     // Implement this method to initialize error pages.
     // You would need to parse and store error pages based on your needs.
-    int error_code;
-    std::string error_page_path;
-
-    // Parse the input string to extract error code and error page path
-    std::istringstream iss(value);
-    if (iss >> error_code >> error_page_path)
+    int error_code = atoi(code.c_str());
+    std::string error_page_path = path;
+    if (error_code >= 100 && error_code <= 599)
     {
         // Store the parsed values in the _error_pages map
         _error_pages[error_code] = error_page_path;
@@ -146,7 +170,9 @@ void Configuration::InitErrorPage(std::string value)
     else
     {
         // Handle parsing error if needed
-        std::cerr << "Error parsing error page: " << value << std::endl;
+        std::string str = "Error parsing error page: " + code + " ";
+        throw std::string(str.append(path));
+        // ! throw exception ?
     }
 }
 
@@ -166,7 +192,9 @@ void Configuration::InitClienBodySize(std::string value)
     else
     {
         // Handle parsing error if needed
-        std::cerr << "Error parsing client max body size: " << value << std::endl;
+        std::string str = "Error parsing client max body size: ";
+        throw std::string(str.append(value));
+        // ! throw exception ?
     }
 }
 
@@ -179,14 +207,15 @@ void Configuration::InitAutoIndex(std::string value)
     std::transform(value.begin(), value.end(), value.begin(), ::tolower);
 
     // Check if the value is "true" or "false"
-    if (value == "true")
+    if (value == "on")
         _AutoIndex = true;
-    else if (value == "false")
+    else if (value == "off")
         _AutoIndex = false;
     else
     {
         // Handle parsing error if needed
         std::cerr << "Error parsing AutoIndex: " << value << std::endl;
+        // ! throw exception ?
     }
 }
 
@@ -237,22 +266,22 @@ std::vector<Location> Configuration::getLocations() const
 
 // friend std::ostream& operator<<(std::ostream& o, const Configuration obj);
 
-// std::ostream& operator<<(std::ostream& o, const Configuration obj)
-// {
-//     o << "Host: " << obj.getHost() << std::endl;
-//     o << "Port: " << obj.getPort() << std::endl;
-//     o << "Server Name: " << obj.getServerNames() << std::endl;
+std::ostream& operator<<(std::ostream& o, const Configuration obj)
+{
+    o << "Host: " << obj.getHost() << std::endl;
+    o << "Port: " << obj.getPort() << std::endl;
+    o << "Server Name: " << obj.getServerNames() << std::endl;
     
-//     // Output location blocks
-//     std::vector<Location> locations = obj.getLocations();
-//     for (size_t i = 0; i < locations.size(); ++i)
-//     {
-//         o << "Location Pattern: " << locations[i].getpattern() << std::endl;
-//         // Output other location properties as needed
-//     }
+    // Output location blocks
+    std::vector<Location> locations = obj.getLocations();
+    for (size_t i = 0; i < locations.size(); ++i)
+    {
+        o << "Location Pattern: " << locations[i].getpattern() << std::endl;
+        // Output other location properties as needed
+    }
     
-//     return o;
-// }
+    return o;
+}
 // This code defines the Configuration class with member functions for initialization and access to its attributes. It also handles parsing location blocks and uses the Location class to store and manage them.
 
 Configuration::~Configuration() {}
