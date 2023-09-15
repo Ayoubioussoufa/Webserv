@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:06 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/14 17:26:50 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/15 12:12:05 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ std::vector<std::string>    Location::Tokenizations(std::string line)
 Location::Location(std::string path, TokenVectsIter& begin, TokenVectsIter& end) : _pattern_exists(false)
 {
     // Initialize the Location object using the provided iterators (assuming they point to strings).
-    // This is a simplified example; you should adapt it based on your configuration format.
     if (!path.empty())
         InitPattern(path);
     while (begin != end)

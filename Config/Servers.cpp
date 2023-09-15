@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/14 13:03:36 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/15 12:27:19 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ int Servers::ConfigFileParse(std::string file)
     std::vector<std::string> block;
     std::stack<char> blockStack;// Stack to keep track of nested blocks
     while (std::getline(File, line))
-    { // ! ILA KAN STR KHAWI MATPUSHIHCH L VECTOR
+    {
         if (line == "server")
         {
             insideServerBlock = true;
@@ -48,15 +48,17 @@ int Servers::ConfigFileParse(std::string file)
                     // hna ndwz string kamlo (block) bach itparsa f configuration onmchi n9lb 3la next server f configfile
                     Configuration config(block);
                     _servers.push_back(config);
-                    for (size_t i = 0; i < block.size(); ++i) {
-                        std::cout << block[i] << std::endl;
-                    } //ghir bach nchofo
-                    std::cout << "--------------------" << std::endl;
+                    // for (size_t i = 0; i < block.size(); ++i) {
+                    //     std::cout << block[i] << std::endl;
+                    // }
                     block.clear(); // Clear the block for the next server
                 }
             }
-            else
-                block.push_back(line);  // Append the line to the block
+        }
+        for (size_t i = 0; i < line.length(); ++i) {
+            if (!std::isspace(static_cast<unsigned char>(line[i]))) {
+                block.push_back(line);// If any non-whitespace character is found
+            }
         }
     }
     File.close();
