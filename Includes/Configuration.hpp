@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:22:39 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/14 17:25:17 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/15 15:07:20 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,6 @@ typedef std::vector<std::string>::iterator TokenVectsIter;
 
 class Configuration
 {
-    public:
-        typedef void (Configuration::*methods)(std::string);
     private:
         std::string                                      _root;
         std::string                                      _host;

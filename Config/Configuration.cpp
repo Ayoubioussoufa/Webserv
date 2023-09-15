@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/14 17:23:40 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/15 15:04:17 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             if (token.size() == 2)
                 InitServerName(token[1]);
             else
-                throw std::string("Invalid server name"); //! error
+                throw std::string("Invalid server name");
         }
         else if (token[0] == "upload_path")
         {
@@ -114,7 +114,7 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             if (token.size() == 3)
                 InitErrorPage(token[1], token[2]);
             else
-                throw std::string("Invalid error page arguments"); // ! error
+                throw std::string("Invalid error page arguments");
         }
         else if (token[0] == "location")
         {

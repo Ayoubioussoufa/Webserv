@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:06 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/15 12:12:05 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/15 15:03:47 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,24 +178,17 @@ void Location::InitErrorPage(std::string code, std::string path)
 
 void Location::InitCgi(std::string path, std::string lang)
 {
-    // Implement this method to initialize CGI settings.
-    // This is a simplified example; adjust it based on your configuration format.
-    // Split the input value into individual CGI settings
-    // based on your format (e.g., key=value pairs separated by space).
-    // You may use a custom parsing logic here.
-    
-    // For demonstration, let's assume a simple space-separated key=value format.
-        if (!lang.empty() && !path.empty())
-        {
-            // Store the CGI setting in the _cgi map.
-            _cgi[lang] = path;
-        }
-        else
-        {
-            // Handle parsing error if needed.
-            std::string str = "Error parsing CGI setting: " + path + " ";
-            throw std::string(str.append(lang));
-        }
+    if (!lang.empty() && !path.empty())
+    {
+        // Store the CGI setting in the _cgi map.
+        _cgi[lang] = path;
+    }
+    else
+    {
+        // Handle parsing error if needed.
+        std::string str = "Error parsing CGI setting: " + path + " ";
+        throw std::string(str.append(lang));
+    }
 }
 
 void Location::InitRoot(std::string value)
