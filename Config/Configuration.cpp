@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/15 15:04:17 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/15 15:47:58 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 Configuration::Configuration()
         : _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
         _host_exists(false), _port_exists(false) {}
-
 std::vector<std::string>    Configuration::Tokenization(std::string line)
 {
     std::vector<std::string> result;
@@ -49,7 +48,10 @@ Configuration::Configuration(std::vector<std::string> vecteur)
         if (token[0] == "host" && token.size() == 2)
         {
             ++begin;
-            InitHost(token[1]);
+            if (begin != end && token.size() == 2)
+                InitHost(token[1]);
+            else
+                throw std::string("Invalid host arguments");
         }
         else if (token[0] == "autoindex")
         {
@@ -57,7 +59,7 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             if (begin != end && token.size() == 2)
                 InitAutoIndex(token[1]);
             else
-                throw std::string("Invalid autoindex");
+                throw std::string("Invalid autoindex arguments");
         }
         else if (token[0] == "index")
         {
@@ -65,7 +67,7 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             if (begin != end && token.size() == 2)
                 InitIndex(token[1]);
             else
-                throw std::string("Invalid Index");
+                throw std::string("Invalid Index arguments");
         }
         else if (token[0] == "client_body_size")
         {
@@ -73,7 +75,7 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             if (begin != end && token.size() == 2)
                 InitClientBodySize(token[1]);
             else
-                throw std::string("Invalid Client body size");
+                throw std::string("Invalid Client body size arguments");
         }
         else if (token[0] == "root")
         {
@@ -81,7 +83,7 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             if (begin != end && token.size() == 2)
                 InitRoot(token[1]);
             else
-                throw std::string("Invalid root");
+                throw std::string("Invalid root arguments");
         }
         else if (token[0] == "listen")
         {
@@ -89,7 +91,7 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             if (isStringAllDigits(token[1]) && token.size() == 2 && atoi(token[1].c_str()) <= 65635)
                 InitPort(token[1]);
             else
-                throw std::string("Invalid port number");
+                throw std::string("Invalid port number arguments");
         }
         else if (token[0] == "server_name")
         {
@@ -97,7 +99,7 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             if (token.size() == 2)
                 InitServerName(token[1]);
             else
-                throw std::string("Invalid server name");
+                throw std::string("Invalid server name arguments");
         }
         else if (token[0] == "upload_path")
         {
@@ -106,7 +108,7 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             if (token.size() == 2 && begin != end)
                 InitUpload(token[1]);
             else
-                throw std::string("Invalid Upload path");
+                throw std::string("Invalid Upload path arguments");
         }
         else if (token[0] == "error_page")
         {
