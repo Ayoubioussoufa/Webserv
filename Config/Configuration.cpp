@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/15 15:47:58 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/15 15:51:00 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,7 @@ void Configuration::InitHost(std::string value)
 
 void Configuration::InitPort(std::string value)
 {
-    _port = value;
+    _port = atoi(value.c_str());
     _port_exists = true;
 }
 
@@ -299,7 +299,7 @@ std::string Configuration::getHost() const
     return _host;
 }
 
-std::string Configuration::getPort() const
+size_t Configuration::getPort() const
 {
     return _port;
 }

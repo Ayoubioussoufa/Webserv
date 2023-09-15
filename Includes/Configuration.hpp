@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:22:39 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/15 15:07:20 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/15 15:50:49 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class Configuration
         size_t                                           _client_max_body_size;
         bool                                             _AutoIndex;
         bool                                             _root_exists;
-        std::string                                      _port;
+        size_t                                      _port;
         bool                                             _host_exists;
         bool                                             _port_exists;
         std::string                                      _upload;
@@ -58,7 +58,7 @@ class Configuration
         bool                         getAutoIndex() const;
         // static    void check_dup(std::string host, std::string port);
         std::string                 getHost() const;
-        std::string                 getPort() const;
+        size_t                      getPort() const;
         std::string                 getServerNames() const;
         std::vector<Location>       getLocations() const;
         friend std::ostream& operator<<(std::ostream& o, Configuration obj);
