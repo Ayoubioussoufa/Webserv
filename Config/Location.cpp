@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:06 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/15 15:03:47 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/18 16:06:11 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ Location::Location(std::string path, TokenVectsIter& begin, TokenVectsIter& end)
             if (begin != end && token.size() == 2)
                 InitUpload(token[1]);
             else
-                throw std::string("Invalid upload path");
+                throw std::string("Invalid upload_path arguments");
         }
         else if (token[0] == "error_page")
         {
@@ -110,10 +110,10 @@ Location::Location(std::string path, TokenVectsIter& begin, TokenVectsIter& end)
         {
             // Extract and set redirect
             ++begin;
-            if (begin != end)
-            {
+            if (begin != end && token.size() == 2)
                 InitRedirect(token[1]);
-            }
+            else
+                throw std::string("Invalid redirect arguments");
         }
         // Handle other tokens as needed
         ++begin;

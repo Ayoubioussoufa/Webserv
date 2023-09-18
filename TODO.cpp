@@ -193,7 +193,7 @@ std::vector<t_listen>				Config::getAllListens() const {
 	return ret;
 }
 
-// kat2mr port o server
+// kat3mr port o server
 int		Cluster::setup(void)
 {
 	std::vector<t_listen>	vect = _config.getAllListens();
