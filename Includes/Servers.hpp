@@ -6,13 +6,14 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/13 14:54:36 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/14 12:12:01 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/18 17:20:09 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Configuration.hpp"
+#include "Socket.hpp"
 
 class Servers
 {
@@ -22,5 +23,6 @@ class Servers
         Servers() {};
         int    ConfigFileParse(std::string file);
         void printServerData() const;
+        int AllServers();
         ~Servers() {};
 };

@@ -6,15 +6,15 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/15 15:51:00 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/18 18:30:08 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Configuration.hpp"
 
 Configuration::Configuration()
-        : _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
-        _host_exists(false), _port_exists(false) {}
+        : _host("localhost"), _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
+        _port(80), _host_exists(false), _port_exists(false) {}
 std::vector<std::string>    Configuration::Tokenization(std::string line)
 {
     std::vector<std::string> result;
@@ -36,8 +36,8 @@ bool Configuration::isStringAllDigits(const std::string& str) {
 }
 
 Configuration::Configuration(std::vector<std::string> vecteur)
-    : _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
-    _host_exists(false), _port_exists(false)
+    : _host("localhost"), _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
+    _port(80), _host_exists(false), _port_exists(false)
 {
     TokenVectsIter begin = vecteur.begin();
     TokenVectsIter end = vecteur.end();

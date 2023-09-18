@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:12:03 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/14 15:57:48 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/18 17:51:46 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,3 +136,5 @@ int Socket::function() {
 //page 215 !!! chapter 7
 
 // https://www.ibm.com/docs/en/i/7.2?topic=designs-example-nonblocking-io-select
+
+

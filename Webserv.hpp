@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 12:25:03 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/14 15:59:04 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/18 18:43:26 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,14 @@
 
 #define PORT 8080 // Where the clients can reach at
 #define MAX_CLIENTS 10 // Maximum number of clients to handle
-
+#include <csignal>
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
 #include <map>
 #include <sstream>
+#include <netdb.h>
 // #include "./Includes/Location.hpp"
 // #include "./Includes/Socket.hpp"
 // #include "./Includes/Configuration.hpp"
@@ -53,3 +54,4 @@
 #include <climits>
 
 typedef std::vector<std::string>::iterator TokenVectsIter;
+void sigintHandler(int signal);
