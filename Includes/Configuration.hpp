@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:22:39 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/15 15:50:49 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/18 09:37:20 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class Configuration
         size_t                                           _client_max_body_size;
         bool                                             _AutoIndex;
         bool                                             _root_exists;
-        size_t                                      _port;
+        size_t                                           _port;
         bool                                             _host_exists;
         bool                                             _port_exists;
         std::string                                      _upload;
