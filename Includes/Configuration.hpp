@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:22:39 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/18 09:37:20 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 09:35:34 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,9 @@ class Configuration
         size_t                      getPort() const;
         std::string                 getServerNames() const;
         std::vector<Location>       getLocations() const;
+        bool                        checkLocations() const;
+        int	                        checkFile(std::string const path, int mode);
+        int                         getTypePath(std::string const path);
         friend std::ostream& operator<<(std::ostream& o, Configuration obj);
         ~Configuration();
 };

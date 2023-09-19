@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/18 18:30:08 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 09:40:45 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,68 @@ Configuration::Configuration(std::vector<std::string> vecteur)
         else
             ++begin;
     }
+    if (getRoot().empty())
+		setRoot("/");
+	if (getHost() == 0)
+		setHost("localhost;");
+	if (getIndex().empty())
+		setIndex("index.html;");
+    if (checkLocation())
+        throw std::string("Location is duplicated");
+    if (!server.getPort())
+		throw std::string("Port not found"); // ! throw exception wla n3mro b 80
+    for (std::map<int, std::string>::iterator it = getErrorPages().begin(); it != getErrorPages().end(); it++)
+    {
+        if (getTypePath(it->second) != 2)
+        {
+    	    if (getTypePath(this->_root + it->second) != 1)
+    	    	throw std::string ("Incorrect path for error page file: " + this->_root + it->second);
+    	    if (checkFile(this->_root + it->second, 0) == -1 || ConfigFile::checkFile(this->_root + it->second, 4) == -1)
+    	    	throw std::string ("Error page file :" + this->_root + it->second + " is not accessible");
+        }
+    }
+}
+
+/* define is path is file(1), folder(2) or something else(3) */
+int Configuration::getTypePath(std::string const path)
+{
+	struct stat	buffer;
+	int			result;
+	
+	result = stat(path.c_str(), &buffer);
+	if (result == 0)
+	{
+		if (buffer.st_mode & S_IFREG)
+			return (1);
+		else if (buffer.st_mode & S_IFDIR)
+			return (2);
+		else
+			return (3);
+	}
+	else
+		return (-1);
+}
+
+/* checks is the file exists and accessable */
+int	Configuration::checkFile(std::string const path, int mode)
+{
+	return (access(path.c_str(), mode));
+}
+
+/* check location for a dublicate */
+bool Configuration::checkLocations() const
+{
+	if (this->_locations.size() < 2)
+		return (false);
+	std::vector<Location>::const_iterator it1;
+	std::vector<Location>::const_iterator it2;
+	for (it1 = this->_locations.begin(); it1 != this->_locations.end() - 1; it1++) {
+		for (it2 = it1 + 1; it2 != this->_locations.end(); it2++) {
+			if (it1->getpattern() == it2->getpattern())
+				return (true);
+		}
+	}
+	return (false);
 }
 
 Configuration::Configuration(const Configuration& other)

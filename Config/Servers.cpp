@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/18 18:59:44 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 09:57:45 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,8 +63,24 @@ int Servers::ConfigFileParse(std::string file)
         }
     }
     File.close();
+    if (this->_nb_server > 1)
+        checkServers();
     AllServers();
     return 0;
+}
+
+void ConfigParser::checkServers()
+{
+    std::vector<Configuration>::iterator it1;
+    std::vector<Configuration>::iterator it1;
+    for (it1 = this->_servers.begin(); it1 != this->_servers.end() - 1; it1++)
+	{
+		for (it2 = it1 + 1; it2 != this->_servers.end(); it2++)
+		{
+			if (it1->getPort() == it2->getPort() && it1->getHost() == it2->getHost() && it1->getServerName() == it2->getServerName())
+				throw std::string("Failed server validation");
+		}
+	}
 }
 
 void Servers::printServerData() const {
@@ -109,7 +125,7 @@ int Servers::AllServers()
         struct sockaddr_in address; // is defined to store socket address information.
         // memset((char *)&address, 0, sizeof(address));
         address.sin_family = AF_INET; //address family (sin_family) to AF_INET for IPv4
-        // address.sin_addr.s_addr = htonl(INADDR_ANY); //sin_addr.s_addr) to INADDR_ANY to listen on all available network interfaces
+// ! hnaya l host        // address.sin_addr.s_addr = htonl(INADDR_ANY); //sin_addr.s_addr) to INADDR_ANY to listen on all available network interfaces
         address.sin_port = htons((size_t)(it->getPort()));
         address.sin_addr = ((struct sockaddr_in *)(res->ai_addr))->sin_addr;
         
@@ -165,7 +181,10 @@ int Servers::AllServers()
                     exit(EXIT_FAILURE);
                 }
                 else if (bytesRead == 0)
+                {
                     close(clientSocket);
+                    exit(EXIT_FAILURE);
+                }
                 else
                 {
                     Response response;

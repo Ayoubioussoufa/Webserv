@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Servers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/13 14:54:36 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/18 17:20:09 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 09:45:05 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,5 +24,6 @@ class Servers
         int    ConfigFileParse(std::string file);
         void printServerData() const;
         int AllServers();
+        void checkServers();
         ~Servers() {};
 };

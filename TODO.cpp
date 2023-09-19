@@ -59,21 +59,16 @@ Remember that the specific steps and requirements may vary depending on your pro
 
 */
 
-// jam3a kolchi
-// for port verification between servers
-std::vector<t_listen>				Config::getAllListens() const {
-	std::vector<t_listen>	ret;
 
-	for (std::vector<ConfigServer>::const_iterator server = this->_servers.begin(); server != this->_servers.end(); server++) {
-		std::vector<t_listen>	listenVec = server->getListen();
-		for (std::vector<t_listen>::iterator listen = listenVec.begin(); listen != listenVec.end(); listen++) {
-			std::vector<t_listen>::iterator i = ret.begin();
-			for ( ; i != ret.end(); i++)
-				if (listen->host == i->host && listen->port == i->port)
-					break ;
-			if (i == ret.end())
-				ret.push_back(*listen);
-		}
-	}
-	return ret;
-}
+/**
+ * Runs main loop that goes through all file descriptors from 0 till the biggest fd in the set.
+ * - check file descriptors returend from select():
+ *      if server fd --> accept new client
+ *      if client fd in read_set --> read message from client
+ *      if client fd in write_set:
+ *          1- If it's a CGI response and Body still not sent to CGI child process --> Send request body to CGI child process.
+ *          2- If it's a CGI response and Body was sent to CGI child process --> Read outupt from CGI child process.
+ *          3- If it's a normal response --> Send response to client.
+ * - servers and clients sockets will be added to _recv_set_pool initially,
+ *   after that, when a request is fully parsed, socket will be moved to _write_set_pool
+ */
