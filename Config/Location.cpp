@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:06 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/18 16:06:11 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 15:26:09 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ std::vector<std::string>    Location::Tokenizations(std::string line)
     return result;
 }
 
-Location::Location(std::string path, TokenVectsIter& begin, TokenVectsIter& end) : _pattern_exists(false)
+Location::Location(std::string path, TokenVectsIter begin, TokenVectsIter end) : _pattern_exists(false)
 {
     // Initialize the Location object using the provided iterators (assuming they point to strings).
     if (!path.empty())

@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 14:09:44 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 15:38:50 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,30 +120,25 @@ Configuration::Configuration(std::vector<std::string> vecteur)
         }
         else if (token[0] == "location")
         {
-            ++begin;
+            begin = begin + line.length() + 1; // ! ach andir hnaya ...
             if (begin != end && token.size() == 2)
             {
                 // Find the closing curly brace of the location block.
                 TokenVectsIter endIt = std::find(begin, end, "}");
                 // Create a Location object and add it to the vector.
-                // std::cout << "END : " << *(endIt - 2) << std::endl;
-                std::cout << "BEFORE : " << *begin << std::endl;
                 Location location(token[1], begin, endIt);
                 _locations.push_back(location); // ! 3lach makitzadch size of locations ? makitkhchawch kamlin ?? 
                 // Move the iterator to the next position after the location block.
-                // begin = endIt;
-                std::cout << "AFTER-1 : " << *(begin - 1) << std::endl;
-                std::cout << "AFTER+1 : " << *(begin + 1) << std::endl;
-                std::cout << "AFTER+2 : " << *(begin + 2) << std::endl;
-                std::cout << "AFTER+100 : " << *(begin + 100) << std::endl;
+                begin = endIt;
+                std::cout << "AFTER : " << *begin << std::endl;
             }
             else
                 throw std::string("Invalid location !"); //!error
         }
         else
-            ++begin;
+            begin++;
     }
-    std::cout << "SZIE : : : : " << _locations.size() << std::endl;
+    std::cout << "SIZE :" << _locations.size() << std::endl;
     if (getRoot().empty())
 		InitRoot("/");
 	if (getHost().empty())
@@ -155,16 +150,18 @@ Configuration::Configuration(std::vector<std::string> vecteur)
     if (!getPort())
 		throw std::string("Port not found"); // ! throw exception wla n3mro b 80
     // std::vector<int> it = getCodes();
+    // std::map<int, std::string> pages = getErrorPages();
+    // std::cout << "SIZE of error pages : " << pages.size() << std::endl;
     // for (std::vector<int>::iterator it2 = it.begin(); it2 != it.end(); it2++)
     // {
-    //     std::map<int, std::string> pages = getErrorPages();
-    //     if (getTypePath(pages[*it2]) != 2)
-    //     {
-    // 	    if (getTypePath(this->_root + pages[*it2]) != 1)
-    // 	    	throw std::string ("Incorrect path for error page file: " + this->_root + pages[*it2]);
-    // 	    if (checkFile(this->_root + pages[*it2], 0) == -1 || checkFile(this->_root + pages[*it2], 4) == -1)
-    // 	    	throw std::string ("Error page file :" + this->_root + pages[*it2] + " is not accessible");
-    //     }
+    //     std::cout << pages[*it2] << std::endl;
+        // if (getTypePath(pages[*it2]) != 2)
+        // {
+    	//     if (getTypePath(this->_root + pages[*it2]) != 1)
+    	//     	throw std::string ("Incorrect path for error page file: " + this->_root + pages[*it2]);
+    	//     if (checkFile(this->_root + pages[*it2], 0) == -1 || checkFile(this->_root + pages[*it2], 4) == -1)
+    	//     	throw std::string ("Error page file :" + this->_root + pages[*it2] + " is not accessible");
+        // }
     // }
 }
 
@@ -205,22 +202,13 @@ bool Configuration::checkLocations() const
     std::vector<Location> locations = getLocations();
     std::cout << locations.size() << std::endl;
 	std::vector<Location>::iterator it1;
-    for (it1 = locations.begin(); it1 != locations.end(); it1++)
-    {
-        std::cout << "-----------" << std::endl;
-        std::cout << *it1 << std::endl;
-        std::cout << "-----------" << std::endl;
-    }
 	if (locations.size() < 2)
 		return (false);
 	std::vector<Location>::iterator it2;
-    std::cout << "PLOP2" << std::endl;
 	for (it1 = locations.begin(); it1 != locations.end() - 1; it1++)
     {
-        std::cout << "PLOP3" << std::endl;
 		for (it2 = it1 + 1; it2 != locations.end(); it2++)
         {
-            std::cout << "PLOP4" << std::endl;
 			if (it1->getpattern() == it2->getpattern())
 				return (true);
 		}

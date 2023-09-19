@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:22:08 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/15 15:07:25 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 15:24:23 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ class Location
         bool                               _pattern_exists;
     public:
         Location();
-        Location(std::string path, TokenVectsIter& begin, TokenVectsIter& end);
+        Location(std::string path, TokenVectsIter begin, TokenVectsIter end);
         Location(const Location& other);
         Location& operator=(const Location& other);
         std::vector<std::string>            Tokenizations(std::string line);
