@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:22:39 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 09:35:34 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 13:22:25 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Configuration
         std::string                                      _host;
         std::string                                      _index;
         std::map<int, std::string>                       _error_pages;
+        std::vector<int>                                 _codes;
         size_t                                           _client_max_body_size;
         bool                                             _AutoIndex;
         bool                                             _root_exists;
@@ -54,6 +55,7 @@ class Configuration
         std::string                  getRoot() const;
         std::string                  getIndex() const;
         std::map<int, std::string>   getErrorPages() const;
+        std::vector<int>             getCodes() const;
         size_t                       getClientMaxBodySize() const;
         bool                         getAutoIndex() const;
         // static    void check_dup(std::string host, std::string port);

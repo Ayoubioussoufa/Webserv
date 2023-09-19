@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 09:57:45 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 13:45:21 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ int Servers::ConfigFileParse(std::string file)
     std::stack<char> blockStack;// Stack to keep track of nested blocks
     while (std::getline(File, line))
     {
+        std::cout << line << std::endl;
         if (line == "server")
         {
             insideServerBlock = true;
@@ -63,21 +64,21 @@ int Servers::ConfigFileParse(std::string file)
         }
     }
     File.close();
-    if (this->_nb_server > 1)
-        checkServers();
-    AllServers();
+    // if (_servers.size() > 1)
+    //     checkServers();
+    // AllServers();
     return 0;
 }
 
-void ConfigParser::checkServers()
+void Servers::checkServers()
 {
     std::vector<Configuration>::iterator it1;
-    std::vector<Configuration>::iterator it1;
+    std::vector<Configuration>::iterator it2;
     for (it1 = this->_servers.begin(); it1 != this->_servers.end() - 1; it1++)
 	{
 		for (it2 = it1 + 1; it2 != this->_servers.end(); it2++)
 		{
-			if (it1->getPort() == it2->getPort() && it1->getHost() == it2->getHost() && it1->getServerName() == it2->getServerName())
+			if (it1->getPort() == it2->getPort() && it1->getHost() == it2->getHost() && it1->getServerNames() == it2->getServerNames())
 				throw std::string("Failed server validation");
 		}
 	}

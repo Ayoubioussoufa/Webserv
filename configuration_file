@@ -1,17 +1,17 @@
 server
 {
 	listen 	 8000
-	error_page 	404 www/pages_error/404.html
-	error_page 	403 www/pages_error/403.html
-	error_page 	405 www/pages_error/405.html
+	error_page 	404 Errors/404.html
+	error_page 	403 Errors/403.html
+	error_page 	405 Errors/405.html
 	upload_path 	www/Upload
 	cgi /Users/ytaya/Desktop/42-Webserv/cgi_bin/php-cgi .php
 	cgi /usr/bin/python3 .py
 	location /
 	{
-		error_page 	404 www/pages_error/404.html
-		error_page 	403 www/pages_error/403.html
-		error_page 	405 www/pages_error/405.html
+		error_page 	404 Errors/404.html
+		error_page 	403 Errors/403.html
+		error_page 	405 Errors/405.html
 		allow_methods POST GET
 		root ./www/
 		autoindex on
@@ -62,9 +62,9 @@ server
 server
 {
 	listen 		5555
-	error_page 	404 www/pages_error/404.html
-	error_page 	403 www/pages_error/403.html
-	error_page 	405 www/pages_error/405.html
+	error_page 	404 Errors/404.html
+	error_page 	403 Errors/403.html
+	error_page 	405 Errors/405.html
 	location 	/
 	{
 		allow_methods GET

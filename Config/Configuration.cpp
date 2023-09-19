@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 09:40:45 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 14:09:44 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 Configuration::Configuration()
         : _host("localhost"), _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
-        _port(80), _host_exists(false), _port_exists(false) {}
+        _port(0), _host_exists(false), _port_exists(false) {}
 std::vector<std::string>    Configuration::Tokenization(std::string line)
 {
     std::vector<std::string> result;
@@ -37,7 +37,7 @@ bool Configuration::isStringAllDigits(const std::string& str) {
 
 Configuration::Configuration(std::vector<std::string> vecteur)
     : _host("localhost"), _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
-    _port(80), _host_exists(false), _port_exists(false)
+    _port(0), _host_exists(false), _port_exists(false)
 {
     TokenVectsIter begin = vecteur.begin();
     TokenVectsIter end = vecteur.end();
@@ -126,10 +126,16 @@ Configuration::Configuration(std::vector<std::string> vecteur)
                 // Find the closing curly brace of the location block.
                 TokenVectsIter endIt = std::find(begin, end, "}");
                 // Create a Location object and add it to the vector.
+                // std::cout << "END : " << *(endIt - 2) << std::endl;
+                std::cout << "BEFORE : " << *begin << std::endl;
                 Location location(token[1], begin, endIt);
-                _locations.push_back(location);
+                _locations.push_back(location); // ! 3lach makitzadch size of locations ? makitkhchawch kamlin ?? 
                 // Move the iterator to the next position after the location block.
-                begin = endIt;
+                // begin = endIt;
+                std::cout << "AFTER-1 : " << *(begin - 1) << std::endl;
+                std::cout << "AFTER+1 : " << *(begin + 1) << std::endl;
+                std::cout << "AFTER+2 : " << *(begin + 2) << std::endl;
+                std::cout << "AFTER+100 : " << *(begin + 100) << std::endl;
             }
             else
                 throw std::string("Invalid location !"); //!error
@@ -137,26 +143,34 @@ Configuration::Configuration(std::vector<std::string> vecteur)
         else
             ++begin;
     }
+    std::cout << "SZIE : : : : " << _locations.size() << std::endl;
     if (getRoot().empty())
-		setRoot("/");
-	if (getHost() == 0)
-		setHost("localhost;");
+		InitRoot("/");
+	if (getHost().empty())
+		InitHost("localhost;");
 	if (getIndex().empty())
-		setIndex("index.html;");
-    if (checkLocation())
+		InitIndex("index.html;"); // ! remove ; ?
+    if (checkLocations())
         throw std::string("Location is duplicated");
-    if (!server.getPort())
+    if (!getPort())
 		throw std::string("Port not found"); // ! throw exception wla n3mro b 80
-    for (std::map<int, std::string>::iterator it = getErrorPages().begin(); it != getErrorPages().end(); it++)
-    {
-        if (getTypePath(it->second) != 2)
-        {
-    	    if (getTypePath(this->_root + it->second) != 1)
-    	    	throw std::string ("Incorrect path for error page file: " + this->_root + it->second);
-    	    if (checkFile(this->_root + it->second, 0) == -1 || ConfigFile::checkFile(this->_root + it->second, 4) == -1)
-    	    	throw std::string ("Error page file :" + this->_root + it->second + " is not accessible");
-        }
-    }
+    // std::vector<int> it = getCodes();
+    // for (std::vector<int>::iterator it2 = it.begin(); it2 != it.end(); it2++)
+    // {
+    //     std::map<int, std::string> pages = getErrorPages();
+    //     if (getTypePath(pages[*it2]) != 2)
+    //     {
+    // 	    if (getTypePath(this->_root + pages[*it2]) != 1)
+    // 	    	throw std::string ("Incorrect path for error page file: " + this->_root + pages[*it2]);
+    // 	    if (checkFile(this->_root + pages[*it2], 0) == -1 || checkFile(this->_root + pages[*it2], 4) == -1)
+    // 	    	throw std::string ("Error page file :" + this->_root + pages[*it2] + " is not accessible");
+    //     }
+    // }
+}
+
+std::vector<int>    Configuration::getCodes() const
+{
+    return _codes;
 }
 
 /* define is path is file(1), folder(2) or something else(3) */
@@ -188,12 +202,25 @@ int	Configuration::checkFile(std::string const path, int mode)
 /* check location for a dublicate */
 bool Configuration::checkLocations() const
 {
-	if (this->_locations.size() < 2)
+    std::vector<Location> locations = getLocations();
+    std::cout << locations.size() << std::endl;
+	std::vector<Location>::iterator it1;
+    for (it1 = locations.begin(); it1 != locations.end(); it1++)
+    {
+        std::cout << "-----------" << std::endl;
+        std::cout << *it1 << std::endl;
+        std::cout << "-----------" << std::endl;
+    }
+	if (locations.size() < 2)
 		return (false);
-	std::vector<Location>::const_iterator it1;
-	std::vector<Location>::const_iterator it2;
-	for (it1 = this->_locations.begin(); it1 != this->_locations.end() - 1; it1++) {
-		for (it2 = it1 + 1; it2 != this->_locations.end(); it2++) {
+	std::vector<Location>::iterator it2;
+    std::cout << "PLOP2" << std::endl;
+	for (it1 = locations.begin(); it1 != locations.end() - 1; it1++)
+    {
+        std::cout << "PLOP3" << std::endl;
+		for (it2 = it1 + 1; it2 != locations.end(); it2++)
+        {
+            std::cout << "PLOP4" << std::endl;
 			if (it1->getpattern() == it2->getpattern())
 				return (true);
 		}
@@ -203,7 +230,7 @@ bool Configuration::checkLocations() const
 
 Configuration::Configuration(const Configuration& other)
     : _root(other._root), _host(other._host), _index(other._index),
-      _error_pages(other._error_pages), _client_max_body_size(other._client_max_body_size),
+      _error_pages(other._error_pages), _codes(other._codes), _client_max_body_size(other._client_max_body_size),
       _AutoIndex(other._AutoIndex), _root_exists(other._root_exists), _port(other._port),
       _host_exists(other._host_exists), _port_exists(other._port_exists),
       _server_name(other._server_name), _locations(other._locations) {}
@@ -215,6 +242,7 @@ Configuration& Configuration::operator=(const Configuration& other)
         _host = other._host;
         _port = other._port;
         _host_exists = other._host_exists;
+        _codes = other._codes;
         _port_exists = other._port_exists;
         _server_name = other._server_name;
         _locations = other._locations;
@@ -261,11 +289,11 @@ void Configuration::InitErrorPage(std::string code, std::string path)
     // Implement this method to initialize error pages.
     // You would need to parse and store error pages based on your needs.
     int error_code = atoi(code.c_str());
-    std::string error_page_path = path;
     if ((error_code >= 100 && error_code <= 599) && !path.empty())
     {
         // Store the parsed values in the _error_pages map
-        _error_pages[error_code] = error_page_path;
+        _error_pages[error_code] = path;
+        _codes.push_back(error_code);
     }
     else
     {

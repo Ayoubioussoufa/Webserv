@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 12:25:06 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 09:44:00 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 13:04:31 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 void sigpipeHandle(int sig) { if(sig) {}}
 
-int main(int ac, char *av[])
+int main(int argc, char *argv[])
 {
     if (argc == 1 || argc == 2) {
 		try 
@@ -27,9 +27,9 @@ int main(int ac, char *av[])
             config = (argc == 1 ? "default.conf" : argv[1]);
             configFile.ConfigFileParse(config);
         }
-        catch (std::exception& e)
+        catch (std::string& e)
         {
-            std::cout << e.what() << std::endl;
+            std::cout << e << std::endl;
             return (1);
         }
     }
