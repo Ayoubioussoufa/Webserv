@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 15:38:50 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 18:11:13 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,12 @@ Configuration::Configuration(std::vector<std::string> vecteur)
     {
         std::string line = *begin;
         std::vector<std::string> token = Tokenization(line);
+        if (token.empty())
+        {
+            // Skip empty lines.
+            ++begin;
+            continue;
+        }
         if (token[0] == "host" && token.size() == 2)
         {
             ++begin;
@@ -110,6 +116,15 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             else
                 throw std::string("Invalid Upload path arguments");
         }
+        else if (token[0] == "cgi")
+        {
+            // Extract and set CGI settings
+            ++begin;
+            if (token.size() == 3 && begin != end)
+                InitCgi(token[1], token[2]);
+            else
+                throw std::string("Invalid cgi arguments");
+        }
         else if (token[0] == "error_page")
         {
             ++begin;
@@ -120,25 +135,28 @@ Configuration::Configuration(std::vector<std::string> vecteur)
         }
         else if (token[0] == "location")
         {
-            begin = begin + line.length() + 1; // ! ach andir hnaya ...
+            ++begin; // ! ach andir hnaya ...
             if (begin != end && token.size() == 2)
             {
                 // Find the closing curly brace of the location block.
-                TokenVectsIter endIt = std::find(begin, end, "}");
+                TokenVectsIter endIt = std::find(begin, end, "	}");
+                if (endIt != end)
+                {
                 // Create a Location object and add it to the vector.
-                Location location(token[1], begin, endIt);
-                _locations.push_back(location); // ! 3lach makitzadch size of locations ? makitkhchawch kamlin ?? 
-                // Move the iterator to the next position after the location block.
-                begin = endIt;
-                std::cout << "AFTER : " << *begin << std::endl;
+                    Location location(token[1], begin, endIt);
+                    _locations.push_back(location); // ! 3lach makitzadch size of locations ? makitkhchawch kamlin ?? 
+                    // Move the iterator to the next position after the location block.
+                    begin = endIt + 1; // Advance by 1 to skip the closing brace.
+                }
+                else
+                    throw std::string("Invalid location: Missing closing '}'");
             }
             else
-                throw std::string("Invalid location !"); //!error
+                throw std::string("Invalid location: Missing location block");
         }
         else
             begin++;
     }
-    std::cout << "SIZE :" << _locations.size() << std::endl;
     if (getRoot().empty())
 		InitRoot("/");
 	if (getHost().empty())
@@ -151,18 +169,16 @@ Configuration::Configuration(std::vector<std::string> vecteur)
 		throw std::string("Port not found"); // ! throw exception wla n3mro b 80
     // std::vector<int> it = getCodes();
     // std::map<int, std::string> pages = getErrorPages();
-    // std::cout << "SIZE of error pages : " << pages.size() << std::endl;
     // for (std::vector<int>::iterator it2 = it.begin(); it2 != it.end(); it2++)
     // {
-    //     std::cout << pages[*it2] << std::endl;
-        // if (getTypePath(pages[*it2]) != 2)
-        // {
-    	//     if (getTypePath(this->_root + pages[*it2]) != 1)
-    	//     	throw std::string ("Incorrect path for error page file: " + this->_root + pages[*it2]);
-    	//     if (checkFile(this->_root + pages[*it2], 0) == -1 || checkFile(this->_root + pages[*it2], 4) == -1)
-    	//     	throw std::string ("Error page file :" + this->_root + pages[*it2] + " is not accessible");
-        // }
-    // }
+    //     if (getTypePath(pages[*it2]) != 2)
+    //     {
+    // 	    if (getTypePath(this->_root + pages[*it2]) != 1)
+    // 	    	throw std::string ("Incorrect path for error page file: " + this->_root + pages[*it2]);
+    // 	    if (checkFile(this->_root + pages[*it2], 0) == -1 || checkFile(this->_root + pages[*it2], 4) == -1)
+    // 	    	throw std::string ("Error page file :" + this->_root + pages[*it2] + " is not accessible");
+    //     }
+    // } // ! to be fixed !! 
 }
 
 std::vector<int>    Configuration::getCodes() const
@@ -173,21 +189,22 @@ std::vector<int>    Configuration::getCodes() const
 /* define is path is file(1), folder(2) or something else(3) */
 int Configuration::getTypePath(std::string const path)
 {
+    // The stat structure is used to store information about a file, such as its size, permissions, and other attributes.
 	struct stat	buffer;
 	int			result;
 	
 	result = stat(path.c_str(), &buffer);
 	if (result == 0)
 	{
-		if (buffer.st_mode & S_IFREG)
-			return (1);
-		else if (buffer.st_mode & S_IFDIR)
-			return (2);
+		if (S_ISREG(buffer.st_mode))
+			return (1); // : This condition checks if the file is a regular file (a file that is not a directory or a special file). If true, it returns 1 to indicate that the path points to a regular file.
+		else if (S_ISDIR(buffer.st_mode))
+			return (2); // This condition checks if the file is a directory. If true, it returns 2 to indicate that the path points to a directory.
 		else
-			return (3);
+			return (3); // If none of the above conditions match, it returns 3 to indicate that the path points to some other type of file.
 	}
 	else
-		return (-1);
+		return (-1); // for error
 }
 
 /* checks is the file exists and accessable */
@@ -200,7 +217,6 @@ int	Configuration::checkFile(std::string const path, int mode)
 bool Configuration::checkLocations() const
 {
     std::vector<Location> locations = getLocations();
-    std::cout << locations.size() << std::endl;
 	std::vector<Location>::iterator it1;
 	if (locations.size() < 2)
 		return (false);
@@ -244,6 +260,24 @@ Configuration& Configuration::operator=(const Configuration& other)
     return *this;
 }
 
+std::map<std::string, std::string>  Configuration::getCgi() const
+{
+    return _cgi;
+}
+void Configuration::InitCgi(std::string path, std::string lang)
+{
+    if (!lang.empty() && !path.empty())
+    {
+        // Store the CGI setting in the _cgi map.
+        _cgi[lang] = path;
+    }
+    else
+    {
+        // Handle parsing error if needed.
+        std::string str = "Error parsing CGI setting: " + path + " ";
+        throw std::string(str.append(lang));
+    }
+}
 void Configuration::InitHost(std::string value)
 {
     _host = value;

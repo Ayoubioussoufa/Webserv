@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 13:45:21 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/19 18:11:37 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ int Servers::ConfigFileParse(std::string file)
     std::stack<char> blockStack;// Stack to keep track of nested blocks
     while (std::getline(File, line))
     {
-        std::cout << line << std::endl;
         if (line == "server")
         {
             insideServerBlock = true;
@@ -57,16 +56,19 @@ int Servers::ConfigFileParse(std::string file)
                 }
             }
         }
+        bool nospace = false;
         for (size_t i = 0; i < line.length(); ++i) {
             if (!std::isspace(static_cast<unsigned char>(line[i]))) {
-                block.push_back(line);// If any non-whitespace character is found
+                nospace = true;
             }
         }
+        if (nospace)
+            block.push_back(line);// If any non-whitespace character is found
     }
     File.close();
-    // if (_servers.size() > 1)
-    //     checkServers();
-    // AllServers();
+    if (_servers.size() > 1)
+        checkServers();
+    AllServers();
     return 0;
 }
 
