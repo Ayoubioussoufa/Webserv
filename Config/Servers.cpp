@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/20 13:31:40 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/20 14:23:53 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,11 +109,12 @@ int Servers::AllServers()
         memset(&hints, 0, sizeof(hints));
         hints.ai_family = AF_INET; 
         hints.ai_socktype = SOCK_STREAM;
-        hints.ai_flags = AI_PASSIVE; // !
-        if (getaddrinfo(it->getHost().c_str(), NULL, &hints, &res) != 0)
+        // hints.ai_flags = AI_PASSIVE; // !
+        std::ostringstream s;
+        s << it->getPort();
+        if (getaddrinfo(it->getHost().c_str(), s.str().c_str(), &hints, &res) != 0)
         {
             std::cerr << "Error resolving hostname: " << it->getHost() << std::endl;
-            close(server_fd);
             continue;
         }
         for (p = res; p != NULL; p = p->ai_next)
@@ -154,14 +155,17 @@ int Servers::AllServers()
     FD_ZERO(&read_fds);
     FD_ZERO(&write_fds);
     for (std::map<int, int>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
+    {
         FD_SET(it->second, &read_fds);
+    }
     while (true)
     {
-        struct timeval timeout;
-        timeout.tv_sec = 1; // 1 second timeout
-        timeout.tv_usec = 0;
-        fd_set tmp = read_fds;
-        int readySockets = select(maxFd + 1, &tmp, NULL, NULL, &timeout); // !
+        // struct timeval timeout;
+        // timeout.tv_sec = 1; // 1 second timeout
+        // timeout.tv_usec = 0;
+        fd_set tmp_read = read_fds;
+        fd_set tmp_write = write_fds;
+        int readySockets = select(maxFd + 1, &tmp_read, &tmp_write, NULL, NULL); // !
         if (readySockets < 0)
         {
             perror("Error with select");
@@ -169,7 +173,7 @@ int Servers::AllServers()
         }
         for (std::map<int, int>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
         {
-            if (FD_ISSET(it->second, &tmp))
+            if (FD_ISSET(it->second, &tmp_read))
             {
                 sockaddr_in clientAddr;
                 int clientSocketw;
@@ -179,39 +183,19 @@ int Servers::AllServers()
                     perror("Error accepting connection");
                     continue;
                 }
+                if (clientSocketw > maxFd)
+                    maxFd = clientSocketw;
                 clientsocket.push_back(clientSocketw);
                 FD_SET(clientSocketw, &read_fds);
             }
         } // ! read then write boucle 3la client
         for (std::vector<int>::iterator its = clientsocket.begin(); its != clientsocket.end(); its++)
         {
-            char buffer[1024] = {0};
-            // Read the HTTP request from the client
-            ssize_t bytesRead = recv(*its, buffer, sizeof(buffer) - 1, 0);
-            if (bytesRead < 0) // ! Error reading from socket: Resource temporarily unavailable, dont know yet why
+            if (FD_ISSET(*its, &tmp_read))
             {
-                perror("Error reading from socket");
-                exit(EXIT_FAILURE);
-            }
-            else if (bytesRead == 0)
-            {
-                close(*its);
-                exit(EXIT_FAILURE);
-            }
-            else
-            {
-                Response response;
-                response.parseHttpRequest(buffer, *its);
-                printf("%s\n", buffer);
-                const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
-                write(*its, hello, strlen(hello));
-                close(*its);
-            }
-        }
-        /*sockets.setnonblocking(&clientSocket);
                 char buffer[1024] = {0};
                 // Read the HTTP request from the client
-                ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+                ssize_t bytesRead = recv(*its, buffer, sizeof(buffer) - 1, 0);
                 if (bytesRead < 0) // ! Error reading from socket: Resource temporarily unavailable, dont know yet why
                 {
                     perror("Error reading from socket");
@@ -219,19 +203,30 @@ int Servers::AllServers()
                 }
                 else if (bytesRead == 0)
                 {
-                    close(clientSocket);
+                    close(*its);
                     exit(EXIT_FAILURE);
                 }
                 else
                 {
                     Response response;
-                    response.parseHttpRequest(buffer, clientSocket);
+                    response.parseHttpRequest(buffer, *its);
                     printf("%s\n", buffer);
-                    const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
-                    write(clientSocket, hello, strlen(hello));
-                    close(clientSocket);
-                }*/
-                std::cout << "--------------------" << std::endl;
+                    FD_CLR(*its, &read_fds);
+                    FD_SET(*its, &write_fds);
+                }
+            }
+        }
+        for (std::vector<int>::iterator its = clientsocket.begin(); its != clientsocket.end(); its++)
+        {
+            if (FD_ISSET(*its, &tmp_write))
+            {
+                // response
+                const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+                write(*its, hello, strlen(hello));
+                FD_CLR(*its, &write_fds);
+                FD_SET(*its, &read_fds);
+            }
+        }
     }
     for (std::map<int, int>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
         close(it->second);

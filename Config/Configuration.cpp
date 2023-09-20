@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/20 12:05:58 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/20 13:57:44 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ bool Configuration::isStringAllDigits(const std::string& str) {
 }
 
 Configuration::Configuration(std::vector<std::string> vecteur)
-    : _host("localhost"), _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
+    : _host("127.0.0.1"), _client_max_body_size(0),  _AutoIndex(false), _root_exists(false),
     _port(0), _host_exists(false), _port_exists(false)
 {
     TokenVectsIter begin = vecteur.begin();
