@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 18:11:13 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/20 12:05:58 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,7 +179,7 @@ Configuration::Configuration(std::vector<std::string> vecteur)
     // 	    	throw std::string ("Error page file :" + this->_root + pages[*it2] + " is not accessible");
     //     }
     // } // ! to be fixed !! 
-}
+} //ila kant / katdir getcwd
 
 std::vector<int>    Configuration::getCodes() const
 {

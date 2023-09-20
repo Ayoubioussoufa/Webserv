@@ -1,7 +1,7 @@
 server
 {
 	listen 	 8000
-	root /mnt/c/Users/Ayoub/Desktop/99/
+	root /nfs/homes/aybiouss/Desktop/Webserv/
 	error_page 	404 Errors/404.html
 	error_page 	403 Errors/403.html
 	error_page 	405 Errors/405.html

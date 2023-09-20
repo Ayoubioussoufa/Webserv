@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 18:11:37 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/20 13:31:40 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,50 +95,50 @@ void Servers::printServerData() const {
 int Servers::AllServers()
 {
     int maxFd = 0; //will store the maximum file descriptor value for use in select()
-    Socket sockets;
     fd_set read_fds; //fd_set is a data structure used to manage file descriptors for I/O operations.
         // Fill up a fd_set structure with the file descriptors you want to know when data comes in on.
     int server_fd;
+    fd_set write_fds;
+    int yes = 1;
+    std::vector<int>    clientsocket; // ! need a client class
     std::map<int, int> serverSockets;
     int i(0);
     for (std::vector<Configuration>::iterator it = _servers.begin(); it != _servers.end(); it++)
     {
-        if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) <= 0) {
-            perror("Cannot create socket");
-            // fprintf(stderr, "socket() failed. (%d)\n", GETSOCKETERRNO());
-            exit(EXIT_FAILURE);
-        }
-        int opt = 1;
-        if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-            perror("setsockopt");
-            exit(EXIT_FAILURE);
-        }
-        
-        struct addrinfo hints, *res;
-        memset(&hints, 0, sizeof hints);
-        hints.ai_family = AF_INET; // IPv4
+        struct addrinfo hints, *p, *res;
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_INET; 
         hints.ai_socktype = SOCK_STREAM;
+        hints.ai_flags = AI_PASSIVE; // !
         if (getaddrinfo(it->getHost().c_str(), NULL, &hints, &res) != 0)
         {
             std::cerr << "Error resolving hostname: " << it->getHost() << std::endl;
             close(server_fd);
             continue;
         }
-        // It creates a socket using socket() with the address family (AF_INET for IPv4) and socket type (SOCK_STREAM for a TCP socket). If socket() fails, it prints an error message using perror() and returns 0.
-        struct sockaddr_in address; // is defined to store socket address information.
-        // memset((char *)&address, 0, sizeof(address));
-        address.sin_family = AF_INET; //address family (sin_family) to AF_INET for IPv4
-// ! hnaya l host        // address.sin_addr.s_addr = htonl(INADDR_ANY); //sin_addr.s_addr) to INADDR_ANY to listen on all available network interfaces
-        address.sin_port = htons((size_t)(it->getPort()));
-        address.sin_addr = ((struct sockaddr_in *)(res->ai_addr))->sin_addr;
-        
-        if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+        for (p = res; p != NULL; p = p->ai_next)
         {
-            perror("Bind failed");
-            // fprintf(stderr, "bind() failed. (%d)\n", GETSOCKETERRNO());
-            exit(EXIT_FAILURE);
-        } // binds the socket to the IP address and port defined in address
-        sockets.setnonblocking(&server_fd);
+            if ((server_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+                perror("server: socket");
+                continue;
+            }   
+            if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+                perror("setsockopt");
+                exit(1);
+            }   
+            if (bind(server_fd, p->ai_addr, p->ai_addrlen) == -1) {
+                close(server_fd);
+                perror("server: bind");
+                continue;
+            }   
+            break;
+        }
+        freeaddrinfo(res);
+        if (p == NULL) {
+            fprintf(stderr, "server: failed to bind\n");
+            exit(1);
+        }
+        // sockets.setnonblocking(&server_fd);
         if (listen(server_fd, MAX_CLIENTS) < 0)
         {
             perror("Listen failed");
@@ -150,14 +150,18 @@ int Servers::AllServers()
             maxFd = server_fd;
         serverSockets[i] = server_fd;
         i++;
-        freeaddrinfo(res);
     }
+    FD_ZERO(&read_fds);
+    FD_ZERO(&write_fds);
+    for (std::map<int, int>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
+        FD_SET(it->second, &read_fds);
     while (true)
     {
-        FD_ZERO(&read_fds);
-        for (std::map<int, int>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
-            FD_SET(it->second, &read_fds);
-        int readySockets = select(maxFd + 1, &read_fds, NULL, NULL, NULL);
+        struct timeval timeout;
+        timeout.tv_sec = 1; // 1 second timeout
+        timeout.tv_usec = 0;
+        fd_set tmp = read_fds;
+        int readySockets = select(maxFd + 1, &tmp, NULL, NULL, &timeout); // !
         if (readySockets < 0)
         {
             perror("Error with select");
@@ -165,16 +169,46 @@ int Servers::AllServers()
         }
         for (std::map<int, int>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
         {
-            if (FD_ISSET(it->second, &read_fds))
+            if (FD_ISSET(it->second, &tmp))
             {
                 sockaddr_in clientAddr;
-                int clientSocket;
+                int clientSocketw;
                 socklen_t addrlen = sizeof(clientAddr);
-                if ((clientSocket = accept(it->second, (struct sockaddr *)&clientAddr, (socklen_t *)&addrlen)) < 0) {
+                if ((clientSocketw = accept(it->second, (struct sockaddr *)&clientAddr, (socklen_t *)&addrlen)) < 0) // is used to accept this incoming connection. It creates a new socket descriptor (new_socket) for this specific client connection. The client's address information is stored in address.
+                {
                     perror("Error accepting connection");
                     continue;
-                } // is used to accept this incoming connection. It creates a new socket descriptor (new_socket) for this specific client connection. The client's address information is stored in address.
-                sockets.setnonblocking(&clientSocket);
+                }
+                clientsocket.push_back(clientSocketw);
+                FD_SET(clientSocketw, &read_fds);
+            }
+        } // ! read then write boucle 3la client
+        for (std::vector<int>::iterator its = clientsocket.begin(); its != clientsocket.end(); its++)
+        {
+            char buffer[1024] = {0};
+            // Read the HTTP request from the client
+            ssize_t bytesRead = recv(*its, buffer, sizeof(buffer) - 1, 0);
+            if (bytesRead < 0) // ! Error reading from socket: Resource temporarily unavailable, dont know yet why
+            {
+                perror("Error reading from socket");
+                exit(EXIT_FAILURE);
+            }
+            else if (bytesRead == 0)
+            {
+                close(*its);
+                exit(EXIT_FAILURE);
+            }
+            else
+            {
+                Response response;
+                response.parseHttpRequest(buffer, *its);
+                printf("%s\n", buffer);
+                const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+                write(*its, hello, strlen(hello));
+                close(*its);
+            }
+        }
+        /*sockets.setnonblocking(&clientSocket);
                 char buffer[1024] = {0};
                 // Read the HTTP request from the client
                 ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
@@ -196,10 +230,8 @@ int Servers::AllServers()
                     const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
                     write(clientSocket, hello, strlen(hello));
                     close(clientSocket);
-                }
+                }*/
                 std::cout << "--------------------" << std::endl;
-            }
-        }
     }
     for (std::map<int, int>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
         close(it->second);
