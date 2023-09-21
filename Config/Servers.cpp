@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/21 11:13:55 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/21 13:47:35 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ int Servers::AllServers()
     int yes = 1;
     std::vector<int>    clientsocket; // ! need a client class
     std::map<int, int> serverSockets;
+    Response response;
     int i(0);
     for (std::vector<Configuration>::iterator it = _servers.begin(); it != _servers.end(); it++)
     {
@@ -189,11 +190,12 @@ int Servers::AllServers()
                 FD_SET(clientSocketw, &read_fds);
             }
         }
+        
         for (std::vector<int>::iterator its = clientsocket.begin(); its != clientsocket.end(); its++)
         {
             if (FD_ISSET(*its, &tmp_read))
             {
-                char buffer[1024] = {0};
+                char buffer[1000000] = {0};
                 // Read the HTTP request from the client
                 ssize_t bytesRead = recv(*its, buffer, sizeof(buffer) - 1, 0);
                 if (bytesRead < 0)
@@ -208,11 +210,13 @@ int Servers::AllServers()
                 }
                 else
                 {
-                    Response response;
-                    response.parseHttpRequest(buffer, *its);
-                    printf("%s\n", buffer);
-                    FD_CLR(*its, &read_fds);
-                    FD_SET(*its, &write_fds);
+                    int i = response.parseHttpRequest(buffer, *its);
+                    // printf("%s\n", buffer);
+                    if (i) // la 9ra kolchi
+                    {
+                        FD_CLR(*its, &read_fds);
+                        FD_SET(*its, &write_fds);
+                    }      
                 }
             }
         }

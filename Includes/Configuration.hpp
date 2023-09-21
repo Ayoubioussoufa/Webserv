@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:22:39 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 17:14:44 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/21 13:31:08 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class Configuration
         std::string                                      _upload;
         std::string                                      _server_name;                                   
         std::vector<Location>                            _locations;
+        
     public:
         Configuration();
         // Configuration operator()(std::string host, std::string  port);
