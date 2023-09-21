@@ -72,24 +72,3 @@ Remember that the specific steps and requirements may vary depending on your pro
  * - servers and clients sockets will be added to _recv_set_pool initially,
  *   after that, when a request is fully parsed, socket will be moved to _write_set_pool
  */
-
-void		Server::processChunk(long socket)
-{
-	std::string	head = _requests[socket].substr(0, _requests[socket].find("\r\n\r\n"));
-	std::string	chunks = _requests[socket].substr(_requests[socket].find("\r\n\r\n") + 4, _requests[socket].size() - 1);
-	std::string	subchunk = chunks.substr(0, 100);
-	std::string	body = "";
-	int			chunksize = strtol(subchunk.c_str(), NULL, 16);
-	size_t		i = 0;
-
-	while (chunksize)
-	{
-		i = chunks.find("\r\n", i) + 2;
-		body += chunks.substr(i, chunksize);
-		i += chunksize + 2;
-		subchunk = chunks.substr(i, 100);
-		chunksize = strtol(subchunk.c_str(), NULL, 16);
-	}
-
-	_requests[socket] = head + "\r\n\r\n" + body + "\r\n\r\n";
-}

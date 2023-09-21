@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:07:10 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/11 10:05:54 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/21 11:16:04 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,12 @@ class Request
         const char*     _bodyFile;
     public:
         Request();
-        void parseHttpRequest(const std::string& requestBuffer, int new_socket);
-        std::string getPath() const;
-        std::string getMethod() const;
-        std::string getHttpVersion() const;
-        std::string getResponseStatus() const;
-        void setResponseStatus(const std::string& status);
+        void            parseHttpRequest(const std::string& requestBuffer, int new_socket);
+        std::string     getPath() const;
+        std::string     getMethod() const;
+        std::string     getHttpVersion() const;
+        std::string     getResponseStatus() const;
+        void            setResponseStatus(const std::string& status);
+        void            processChunk(const std::string& buffer); // int socket ?
         ~Request();
 };

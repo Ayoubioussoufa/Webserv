@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/20 14:23:53 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/21 11:13:55 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,7 @@ int Servers::AllServers()
                 clientsocket.push_back(clientSocketw);
                 FD_SET(clientSocketw, &read_fds);
             }
-        } // ! read then write boucle 3la client
+        }
         for (std::vector<int>::iterator its = clientsocket.begin(); its != clientsocket.end(); its++)
         {
             if (FD_ISSET(*its, &tmp_read))
@@ -196,7 +196,7 @@ int Servers::AllServers()
                 char buffer[1024] = {0};
                 // Read the HTTP request from the client
                 ssize_t bytesRead = recv(*its, buffer, sizeof(buffer) - 1, 0);
-                if (bytesRead < 0) // ! Error reading from socket: Resource temporarily unavailable, dont know yet why
+                if (bytesRead < 0)
                 {
                     perror("Error reading from socket");
                     exit(EXIT_FAILURE);
