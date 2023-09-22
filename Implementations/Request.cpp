@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:27:53 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/22 15:18:20 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/22 16:10:01 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ int		Request::processChunk(const std::string &buffer)
     else
 	    chunks = buffer.substr(0, buffer.length() - 1);
     _body += chunks;
-    std::cout << _body << " WOW " << _body.length() << std::endl;
+    // std::cout << _body << " WOW " << _body.length() << std::endl;
     if (!_body.empty())
     {
         size_t pos = _header_before.find("Content-length: ");
@@ -46,15 +46,17 @@ int		Request::processChunk(const std::string &buffer)
         {
             pos += strlen("Content-length: ");
             size_t end_pos = _header_before.find("\r\n", pos);
+            std::cout << pos << "   " << end_pos << std::endl;
             if (end_pos != std::string::npos)
             {
                 std::string length = _header_before.substr(pos, end_pos - pos);
                 size_t len = strtol(length.c_str(), NULL, 10);
                 std::cout << "Content-Length as integer: " << len << std::endl;
+                processBody();
                 if (len == _body.length())
                 {
                     _header_before += _body;
-                    std::cout << _body << std::endl;
+                    std::cout << _header_before << std::endl;
                     return 0;
                 }
                 else
@@ -65,23 +67,40 @@ int		Request::processChunk(const std::string &buffer)
     else
         return 0;
     return 1;
-	// std::string	subchunk = chunks.substr(0, 100);
-    // if ()
-	// std::string	body = "";
-	// int			chunksize = strtol(subchunk.c_str(), NULL, 16);
-	// size_t		i = 0;
-	// while (chunksize)
-	// {
-	// 	i = chunks.find("\r\n", i) + 2;
-	// 	body += chunks.substr(i, chunksize);
-	// 	i += chunksize + 2;
-	// 	subchunk = chunks.substr(i, 100);
-	// 	chunksize = strtol(subchunk.c_str(), NULL, 16);
-	// }
-	// std::string requestBuffer = head + "\r\n\r\n" + body + "\r\n\r\n"; // NJM3Ha kamla onsiftha l constructor again and clear the old one
-    // std::cout << requestBuffer << std::endl;
-    // ! if content length == body.size means the request is done !
-    // return 0;
+}
+
+void    Request::processBody()
+{
+    std::string	subchunk = _body.substr(0, 100);
+	std::string	body = "";
+	int			chunksize = strtol(subchunk.c_str(), NULL, 16);
+	size_t		i = 0;
+	while (chunksize)
+	{
+		i = _body.find("\r\n", i) + 2;
+		body += _body.substr(i, chunksize);
+		i += chunksize + 2;
+		subchunk = _body.substr(i, 100);
+		chunksize = strtol(subchunk.c_str(), NULL, 16);
+	}
+    _body.clear();
+    _body = body;
+
+    // std::string body = _body;
+    // _body.clear();
+    // std::istringstream ss(body);
+    // std::string line;
+    // while (std::getline(ss, line) && !line.empty())
+    // {
+    //     int length = strtol(line.c_str(), NULL, 16);
+    //     if (length)
+    //     {
+    //         if (std::getline(ss, line) && !line.empty())
+    //         {
+                
+    //         }
+    //     }
+    // }
 }
 
 int Request::parseRequest()
@@ -142,13 +161,13 @@ int Request::parseRequest()
             }
         }
     }
-    std::cout << "*******************" << std::endl;
-    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
-    {
-        std::cout << it->first << " " << it->second << std::endl;
-    }
-    std::cout << std::endl;
-    std::cout << "*******************" << std::endl;
+    // std::cout << "*******************" << std::endl;
+    // for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
+    // {
+    //     std::cout << it->first << " " << it->second << std::endl;
+    // }
+    // std::cout << std::endl;
+    // std::cout << "*******************" << std::endl;
     // (void)new_socket;
     if (_method == "POST") {
         if (!isContentLengthFound) {
@@ -202,84 +221,21 @@ void Request::setResponseStatus(const std::string& status) {
 
 Request::~Request() {}
 
-/*
-std::istringstream requestStream(requestBuffer);
-    std::string line;
-    
-    // Read the first line (request line)
-    if (!std::getline(requestStream, line)) {
-        // Handle an empty or incomplete request
-        setResponseStatus("400 Bad Request");
-        return ;
-    }
-    std::istringstream requestLineStream(line);
-    if (!(requestLineStream >> _method >> _path >> _httpVersion)) {
-        // Handle invalid request line
-        setResponseStatus("400 Bad Request");
-        return;
-    }
-    //This splitting is achieved by using the >> operator, which is used to extract values from the input stream (requestLineStream in this case) based on whitespace (spaces or tabs) as the delimiter.
-    if (_path == "/favicon.ico") {
-        // Handle it as needed (status), or simply return an empty request
-        return ;
-    }
-    std::string forBody;
-    bool isContentLengthFound = false;
-    std::size_t contentLength = 0;
-    // Read and parse headers
-    while (std::getline(requestStream, line) && !line.empty())
-    {
-        forBody += line + "\n";
-        size_t pos = line.find(":");
-        if (pos != std::string::npos) {
-            std::string headerName = line.substr(0, pos);
-            std::string headerValue = line.substr(pos + 1);
-            // Remove leading/trailing whitespaces from header values
-            headerValue.erase(0, headerValue.find_first_not_of(" \t"));
-            headerValue.erase(headerValue.find_last_not_of(" \t") + 1);
-            _header[headerName] = headerValue;
-            if (_method == "POST" && headerName == "Content-Length")
-            {
-                try {
-                    char* endptr;
-                    const char* headerValueCStr = headerValue.c_str();
-                    unsigned long parsedContentLength = strtoul(headerValueCStr, &endptr, 10);
 
-                    if (parsedContentLength == ULONG_MAX) { endptr == headerValueCStr || *endptr != '\0' || 
-                        // Handle invalid Content-Length value
-                        setResponseStatus("400 Bad Request");
-                        return;
-                    }
-                    contentLength = parsedContentLength;
-                    isContentLengthFound = true;
-                } catch (const std::exception& e) {
-                    // Handle invalid Content-Length value
-                    setResponseStatus("400 Bad Request");
-                    return;
-                }
-            }
-        }
-    }
-    if (_method == "POST") {
-        if (!isContentLengthFound) {
-            // Handle missing Content-Length header for POST requests
-            setResponseStatus("411 Length Required");
-            return;
-        }
-        std::size_t bodyPos = forBody.find("\r\n\r\n");
-        if (bodyPos != std::string::npos) {
-            // Extract the body
-            std::string requestBody = forBody.substr(bodyPos + 4);
-            // Write the body to a file
-            _bodyFile = "BodyOfRequest.txt";
-            std::ofstream outfile(_bodyFile, std::ofstream::binary);
-            outfile.write(requestBody.c_str(), contentLength);
-            outfile.close();
-        }
-        else {
-            // Handle missing Content-Length header for POST requests
-            setResponseStatus("411 Length Required");
-            return ;
-        }
-    }
-*/
+    // if ()
+	// std::string	subchunk = chunks.substr(0, 100);
+	// std::string	body = "";
+	// int			chunksize = strtol(subchunk.c_str(), NULL, 16);
+	// size_t		i = 0;
+	// while (chunksize)
+	// {
+	// 	i = chunks.find("\r\n", i) + 2;
+	// 	body += chunks.substr(i, chunksize);
+	// 	i += chunksize + 2;
+	// 	subchunk = chunks.substr(i, 100);
+	// 	chunksize = strtol(subchunk.c_str(), NULL, 16);
+	// }
+	// std::string requestBuffer = head + "\r\n\r\n" + body + "\r\n\r\n"; // NJM3Ha kamla onsiftha l constructor again and clear the old one
+    // std::cout << requestBuffer << std::endl;
+    // ! if content length == body.size means the request is done !
+    // return 0;

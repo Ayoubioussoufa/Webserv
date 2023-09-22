@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:07:10 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/22 14:38:14 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/22 15:53:51 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,5 +35,6 @@ class Request
         void            setResponseStatus(const std::string& status);
         int            processChunk(const std::string& buffer); // int socket ?
         int             parseRequest();
+        void            processBody();
         ~Request();
 };

@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/22 15:10:32 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/22 16:05:57 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,7 +213,7 @@ int Servers::AllServers()
                 else
                 {
                     i = its->response.parseHttpRequest(buffer, its->GetSocketId());
-                    printf("%s\n", buffer);
+                    // printf("%s\n", buffer);
                     if (!i) // la 9ra kolchi
                     {
                         FD_CLR(its->GetSocketId(), &read_fds);
