@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:27:53 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/22 16:10:01 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/22 19:42:13 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,43 +20,119 @@ int Request::parseHttpRequest(const std::string& requestBuffer, int new_socket) 
     // std::cout << requestBuffer.find("Transfer-Encoding: chunked") << std::endl;
     // std::cout << requestBuffer << std::endl;
     int i = processChunk(requestBuffer);
-    if (!i)
-        return parseRequest();
-    return 1;
+    (void)i;
+    // if (!i)
+    //     return parseRequest();
+    return i;
+}
+
+size_t Request::customFind(const std::vector<char>& vec, const std::string& str)
+{
+    if (vec.empty() || str.empty())
+        return std::string::npos; // Not found
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (vec[i] == str[0])
+        { // If the first character matches
+            bool found = true;
+            for (size_t j = 0; j < str.length(); ++j) {
+                if (i + j >= vec.size() || vec[i + j] != str[j])
+                {
+                    found = false;
+                    break;
+                }
+            }
+            if (found)
+                return i; // Found at position i
+        }
+    }
+    return std::string::npos; // Not found
+}
+
+std::vector<char> Request::customSubstr(const std::vector<char>& vec, size_t start, size_t length)
+{
+    std::vector<char> result;
+
+    if (start >= vec.size()) {
+        return result; // Return an empty vector if the start position is out of bounds
+    }
+    for (size_t i = start; i < start + length && i < vec.size(); ++i) {
+        result.push_back(vec[i]);
+    }
+    return result;
 }
 
 int		Request::processChunk(const std::string &buffer)
 {
-    std::string	chunks;
+    //_outfile.open(_filename.c_str(), std::ios::out | std::ios::binary);
+    std::vector<char>	chunks; // chunks f file
     // nrd requests vector and check in function of the socket (fd)
-    if (_header_before.find("\r\n\r\n") == std::string::npos)
+    if (customFind(_header_before, "\n\r\n") == std::string::npos)
     {
-	    _header_before += buffer.substr(0, buffer.find("\r\n\r\n"));
-        if (buffer.find("\r\n\r\n") != std::string::npos)
-            chunks = buffer.substr(buffer.find("\r\n\r\n") + 4, buffer.length() - 1);
-    }
-    else
-	    chunks = buffer.substr(0, buffer.length() - 1);
-    _body += chunks;
-    // std::cout << _body << " WOW " << _body.length() << std::endl;
-    if (!_body.empty())
-    {
-        size_t pos = _header_before.find("Content-length: ");
+        int i = 0;
+	    while (buffer[i])
+            _header_before.push_back(buffer[i++]);
+        size_t pos = customFind(_header_before, "\r\n\r\n");
         if (pos != std::string::npos)
         {
-            pos += strlen("Content-length: ");
-            size_t end_pos = _header_before.find("\r\n", pos);
-            std::cout << pos << "   " << end_pos << std::endl;
+            chunks = customSubstr(_header_before, pos + 4, _header_before.size());
+            _header_before = customSubstr(_header_before, 0, pos + 4); // ! changeable
+            for (std::vector<char>::iterator it = _header_before.begin(); it != _header_before.end(); it++)
+            {
+                std::cout << *it;
+            }
+            std::cout << "----------------" << std::endl;
+            for (std::vector<char>::iterator it = chunks.begin(); it != chunks.end(); it++)
+            {
+                std::cout << *it;
+            }
+            std::cout << std::endl;
+            int j = parseHeaders();
+            if (!j)
+                return 0;
+        }
+    }
+    else
+	{
+        while (buffer[i])
+            chunks.push_back(buffer[i++]);
+    }
+    if (!chunks.empty())
+    {
+        processBody(chunks);
+    }
+    // _body += chunks;
+    // std::cout << "********************************" << std::endl;
+    // std::cout << _header_before << std::endl;
+    // std::cout << "------------------------------------------" << std::endl;
+    // std::cout << _body << " WOW " << _body.length() << std::endl;
+    // std::cout << "********************************" << std::endl;
+    /*if (!_body.empty())
+    {
+        size_t pos = _header_before.find("Content-Length: ");
+        // std::cout << "Content length pos : " << pos << std::endl;
+        if (pos != std::string::npos)
+        {
+            // std::cout << "********************************" << std::endl;
+            pos += strlen("Content-length:"); // !7iydt espace hnaya might add it later
+            // std::cout << "Content length pos skipped : " << pos << std::endl;
+            size_t end_pos = _header_before.find("\r", pos);
+            // std::cout << pos << "   " << end_pos << std::endl;
+            // std::cout << "********************************" << std::endl;
             if (end_pos != std::string::npos)
             {
                 std::string length = _header_before.substr(pos, end_pos - pos);
                 size_t len = strtol(length.c_str(), NULL, 10);
-                std::cout << "Content-Length as integer: " << len << std::endl;
+                // std::cout << "Content-Length as integer: " << len << std::endl;
                 processBody();
+                // std::cout << _body.length() << std::endl;
                 if (len == _body.length())
                 {
-                    _header_before += _body;
-                    std::cout << _header_before << std::endl;
+                    ;
+                    // std::cout << "+++++++++++++++++++++++++++++" << std::endl; 
+                    // std::cout << _body << std::endl << std::endl;
+                    // _header_before = _header_before + "\n\r\n" + _body + "\r\n\r\n";
+                    // std::cout << _header_before << std::endl;
+                    // std::cout << "+++++++++++++++++++++++++++++" << std::endl; 
                     return 0;
                 }
                 else
@@ -65,26 +141,29 @@ int		Request::processChunk(const std::string &buffer)
         }
     }
     else
-        return 0;
+        return 0;*/
     return 1;
 }
 
-void    Request::processBody()
+void    Request::processBody(std::vector<char>& vec)
 {
-    std::string	subchunk = _body.substr(0, 100);
+    std::vector<char>	subchunk = customSubstr(vec, 0, 100);
 	std::string	body = "";
 	int			chunksize = strtol(subchunk.c_str(), NULL, 16);
 	size_t		i = 0;
 	while (chunksize)
 	{
-		i = _body.find("\r\n", i) + 2;
+		i = _body.customFind("\r\n", i) + 2;
 		body += _body.substr(i, chunksize);
 		i += chunksize + 2;
 		subchunk = _body.substr(i, 100);
 		chunksize = strtol(subchunk.c_str(), NULL, 16);
 	}
-    _body.clear();
-    _body = body;
+    if (_outfile.is_open())
+    {
+        _outfile << body;
+    }
+}
 
     // std::string body = _body;
     // _body.clear();
@@ -101,10 +180,66 @@ void    Request::processBody()
     //         }
     //     }
     // }
+
+int    Request::parseHeaders()
+{
+    string header = vectorCharToString(_header_before);
+    std::istringstream requestStream(header);
+    std::string line;
+
+    // Read the first line (request line)
+    if (!std::getline(requestStream, line)) {
+        // Handle an empty or incomplete request
+        setResponseStatus("400 Bad Request");
+        return 0;
+    }
+    std::istringstream requestLineStream(line);
+    if (!(requestLineStream >> _method >> _path >> _httpVersion)) {
+        // Handle invalid request line
+        setResponseStatus("400 Bad Request");
+        return 0;
+    }
+    //This splitting is achieved by using the >> operator, which is used to extract values from the input stream (requestLineStream in this case) based on whitespace (spaces or tabs) as the delimiter.
+    if (_path == "/favicon.ico") {
+        // Handle it as needed (status), or simply return an empty request
+        return 0;
+    }
+    std::string forBody;
+    bool isContentLengthFound = false;
+    std::size_t contentLength = 0;
+    // Read and parse headers
+    while (std::getline(requestStream, line) && !line.empty()) {
+        forBody += line + "\n";
+        size_t pos = line.find(":");
+        if (pos != std::string::npos) {
+            std::string headerName = line.substr(0, pos);
+            std::string headerValue = line.substr(pos + 1);
+            // Remove leading/trailing whitespaces from header values
+            headerValue.erase(0, headerValue.find_first_not_of(" \t"));
+            headerValue.erase(headerValue.find_last_not_of(" \t") + 1);
+            _headers[headerName] = headerValue;
+        }
+    }
+    if (_method == "GET")
+        return 0;
 }
 
-int Request::parseRequest()
+std::string Request::vectorCharToString(const std::vector<char>& vec)
 {
+    std::string result;
+    result.reserve(vec.size()); // Reserve space for efficiency
+    for (size_t i = 0; i < vec.size(); ++i) {
+        result.push_back(vec[i]);
+    }
+    return result;
+}
+
+/*int Request::parseRequest()
+{
+    // std::cout << "----------------+++++++++++++++++++++++++++" << std::endl;
+    // std::cout << _header_before << std::endl;
+    // std::cout << "----------------+++++++++++++++++++++++++++" << std::endl;
+    // return 1;
     std::istringstream requestStream(_header_before);
     std::string line;
 
@@ -146,7 +281,7 @@ int Request::parseRequest()
                     const char* headerValueCStr = headerValue.c_str();
                     unsigned long parsedContentLength = strtoul(headerValueCStr, &endptr, 10);
 
-                    if (parsedContentLength == ULONG_MAX) { /*endptr == headerValueCStr || *endptr != '\0' || */
+                    if (parsedContentLength == ULONG_MAX) { endptr == headerValueCStr || *endptr != '\0' ||
                         // Handle invalid Content-Length value
                         setResponseStatus("400 Bad Request");
                         return 0;
@@ -193,7 +328,7 @@ int Request::parseRequest()
     }
     setResponseStatus("200 OK");
     return (0);
-}
+}*/
 
 std::string Request::getPath() const
 {

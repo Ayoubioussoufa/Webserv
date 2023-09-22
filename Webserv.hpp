@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 12:25:03 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/18 18:43:26 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/22 18:53:33 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,5 +53,7 @@
 #include <exception>
 #include <climits>
 
+
+std::string GenerateFile( void );
 typedef std::vector<std::string>::iterator TokenVectsIter;
 void sigintHandler(int signal);
