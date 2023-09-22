@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/21 13:47:35 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/22 15:10:32 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,10 +100,9 @@ int Servers::AllServers()
     int server_fd;
     fd_set write_fds;
     int yes = 1;
-    std::vector<int>    clientsocket; // ! need a client class
-    std::map<int, int> serverSockets;
-    Response response;
-    int i(0);
+    std::vector<int>    clientsocket;
+    std::map<int, Configuration> serverSockets;
+    int i(10);
     for (std::vector<Configuration>::iterator it = _servers.begin(); it != _servers.end(); it++)
     {
         struct addrinfo hints, *p, *res;
@@ -150,14 +149,14 @@ int Servers::AllServers()
         std::cout << "Listening on port " << it->getPort() << std::endl;
         if (server_fd > maxFd)
             maxFd = server_fd;
-        serverSockets[i] = server_fd;
+        serverSockets[server_fd] = *it;
         i++;
     }
     FD_ZERO(&read_fds);
     FD_ZERO(&write_fds);
-    for (std::map<int, int>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
+    for (std::map<int, Configuration>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
     {
-        FD_SET(it->second, &read_fds);
+        FD_SET(it->first, &read_fds);
     }
     while (true)
     {
@@ -172,32 +171,35 @@ int Servers::AllServers()
             perror("Error with select");
             exit(EXIT_FAILURE);
         }
-        for (std::map<int, int>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
+        for (std::map<int, Configuration>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
         {
-            if (FD_ISSET(it->second, &tmp_read))
+            if (FD_ISSET(it->first, &tmp_read))
             {
+                Client  new_client;
                 sockaddr_in clientAddr;
                 int clientSocketw;
                 socklen_t addrlen = sizeof(clientAddr);
-                if ((clientSocketw = accept(it->second, (struct sockaddr *)&clientAddr, (socklen_t *)&addrlen)) < 0) // is used to accept this incoming connection. It creates a new socket descriptor (new_socket) for this specific client connection. The client's address information is stored in address.
+                if ((clientSocketw = accept(it->first, (struct sockaddr *)&clientAddr, (socklen_t *)&addrlen)) < 0) // is used to accept this incoming connection. It creates a new socket descriptor (new_socket) for this specific client connection. The client's address information is stored in address.
                 {
                     perror("Error accepting connection");
                     continue;
                 }
                 if (clientSocketw > maxFd)
                     maxFd = clientSocketw;
-                clientsocket.push_back(clientSocketw);
+                new_client.set_socket(clientSocketw);
+                new_client.set_server(it->second);
+                _client.push_back(new_client);
                 FD_SET(clientSocketw, &read_fds);
             }
         }
         
-        for (std::vector<int>::iterator its = clientsocket.begin(); its != clientsocket.end(); its++)
+        for (std::vector<Client>::iterator its = _client.begin(); its != _client.end(); its++)
         {
-            if (FD_ISSET(*its, &tmp_read))
+            if (FD_ISSET(its->GetSocketId(), &tmp_read))
             {
                 char buffer[1000000] = {0};
                 // Read the HTTP request from the client
-                ssize_t bytesRead = recv(*its, buffer, sizeof(buffer) - 1, 0);
+                ssize_t bytesRead = recv(its->GetSocketId(), buffer, sizeof(buffer) - 1, 0);
                 if (bytesRead < 0)
                 {
                     perror("Error reading from socket");
@@ -205,18 +207,18 @@ int Servers::AllServers()
                 }
                 else if (bytesRead == 0)
                 {
-                    close(*its);
+                    close(its->GetSocketId());
                     exit(EXIT_FAILURE);
                 }
                 else
                 {
-                    int i = response.parseHttpRequest(buffer, *its);
-                    // printf("%s\n", buffer);
-                    if (i) // la 9ra kolchi
+                    i = its->response.parseHttpRequest(buffer, its->GetSocketId());
+                    printf("%s\n", buffer);
+                    if (!i) // la 9ra kolchi
                     {
-                        FD_CLR(*its, &read_fds);
-                        FD_SET(*its, &write_fds);
-                    }      
+                        FD_CLR(its->GetSocketId(), &read_fds);
+                        FD_SET(its->GetSocketId(), &write_fds);
+                    }
                 }
             }
         }
@@ -232,7 +234,7 @@ int Servers::AllServers()
             }
         }
     }
-    for (std::map<int, int>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
-        close(it->second);
+    for (std::map<int, Configuration>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
+        close(it->first);
     return 0;
 }

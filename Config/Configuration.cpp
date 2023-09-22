@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/20 13:57:44 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/22 13:38:30 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,19 +243,21 @@ Configuration& Configuration::operator=(const Configuration& other)
 {
     if (this != &other)
     {
-        _host = other._host;
-        _port = other._port;
-        _host_exists = other._host_exists;
-        _codes = other._codes;
-        _port_exists = other._port_exists;
-        _server_name = other._server_name;
-        _locations = other._locations;
         _root = other._root;
+        _host = other._host;
         _index = other._index;
         _error_pages = other._error_pages;
+        _codes = other._codes;
+        _cgi = other._cgi;
         _client_max_body_size = other._client_max_body_size;
         _AutoIndex = other._AutoIndex;
         _root_exists = other._root_exists;
+        _port = other._port;
+        _host_exists = other._host_exists;
+        _port_exists = other._port_exists;
+        _upload = other._upload;
+        _server_name = other._server_name;
+        _locations = other._locations;
     }
     return *this;
 }

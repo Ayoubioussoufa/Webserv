@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:06 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 16:44:58 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/22 13:40:11 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,10 +132,16 @@ Location& Location::operator=(const Location& other)
     if (this != &other)
     {
         _pattern = other._pattern;
+        _error_pages = other._error_pages;
         _limit_except = other._limit_except;
+        _index = other._index;
         _cgi = other._cgi;
         _upload = other._upload;
         _redirect = other._redirect;
+        _root = other._root;
+        _client_max_body_size = other._client_max_body_size;
+        _AutoIndex = other._AutoIndex;
+        _root_exists = other._root_exists;
         _pattern_exists = other._pattern_exists;
     }
     return *this;

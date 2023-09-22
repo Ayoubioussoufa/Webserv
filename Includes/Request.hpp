@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:07:10 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/21 13:19:48 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/22 14:38:14 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,9 @@ class Request
         std::string     _path;
         std::string     _httpVersion;
         std::string     _responseStatus;
-        std::map<std::string, std::string> _header;
+        std::string     _header_before;
+        std::string     _body;
+        std::map<std::string, std::string> _headers;
         const char*     _bodyFile;
     public:
         Request();
@@ -32,5 +34,6 @@ class Request
         std::string     getResponseStatus() const;
         void            setResponseStatus(const std::string& status);
         int            processChunk(const std::string& buffer); // int socket ?
+        int             parseRequest();
         ~Request();
 };
