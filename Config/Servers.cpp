@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/22 19:43:16 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/23 14:57:42 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,6 @@ int Servers::AllServers()
     int yes = 1;
     std::vector<int>    clientsocket;
     std::map<int, Configuration> serverSockets;
-    int i(10);
     for (std::vector<Configuration>::iterator it = _servers.begin(); it != _servers.end(); it++)
     {
         struct addrinfo hints, *p, *res;
@@ -150,7 +149,6 @@ int Servers::AllServers()
         if (server_fd > maxFd)
             maxFd = server_fd;
         serverSockets[server_fd] = *it;
-        i++;
     }
     FD_ZERO(&read_fds);
     FD_ZERO(&write_fds);
@@ -163,9 +161,14 @@ int Servers::AllServers()
         // struct timeval timeout;
         // timeout.tv_sec = 1; // 1 second timeout
         // timeout.tv_usec = 0;
-        fd_set tmp_read = read_fds;
-        fd_set tmp_write = write_fds;
+        fd_set tmp_read;
+        fd_set tmp_write;
+        tmp_read = read_fds;
+        tmp_write = write_fds;
+        // std::cout << "Sben-elal9rd6" << std::endl;
         int readySockets = select(maxFd + 1, &tmp_read, &tmp_write, NULL, NULL); // !
+        // std::cout << "Sben-elal9rd7" << std::endl;
+
         if (readySockets < 0)
         {
             perror("Error with select");
@@ -197,9 +200,9 @@ int Servers::AllServers()
         {
             if (FD_ISSET(its->GetSocketId(), &tmp_read))
             {
-                char buffer[1000000] = {0};
+                char buffer[1024] = {0};
                 // Read the HTTP request from the client
-                ssize_t bytesRead = recv(its->GetSocketId(), buffer, sizeof(buffer) - 1, 0);
+                ssize_t bytesRead = recv(its->GetSocketId(), buffer, sizeof(buffer), 0);
                 if (bytesRead < 0)
                 {
                     perror("Error reading from socket");
@@ -212,29 +215,34 @@ int Servers::AllServers()
                 }
                 else
                 {
-                    i = its->response.parseHttpRequest(buffer, its->GetSocketId());
-                    printf("%s\n", buffer); // file idar f request
-                    if (!i) // la 9ra kolchi
-                    {
-                        FD_CLR(its->GetSocketId(), &read_fds);
-                        FD_SET(its->GetSocketId(), &write_fds);
-                    }
+                    // std::cout << "**********************-----------" << std::endl;
+                    // i = its->response.parseHttpRequest(buffer, its->GetSocketId());
+                    printf("%s\n", buffer);
+                    FD_SET(its->GetSocketId(), &read_fds);
                 }
             }
         }
-        for (std::vector<int>::iterator its = clientsocket.begin(); its != clientsocket.end(); its++)
-        {
-            if (FD_ISSET(*its, &tmp_write))
-            {
-                // response
-                const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
-                write(*its, hello, strlen(hello));
-                FD_CLR(*its, &write_fds);
-                FD_SET(*its, &read_fds);
-            }
-        }
     }
-    for (std::map<int, Configuration>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
-        close(it->first);
     return 0;
 }
+
+// if (!i) // la 9ra kolchi
+// {
+//     FD_CLR(its->GetSocketId(), &read_fds);
+//     FD_SET(its->GetSocketId(), &write_fds);
+// }
+
+// for (std::vector<Client>::iterator its = _client.begin(); its != _client.end(); its++)
+// {
+//     if (FD_ISSET(its->GetSocketId(), &tmp_write))
+//     {
+//         // response
+//         const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+//         write(its->GetSocketId(), hello, strlen(hello));
+//         FD_CLR(its->GetSocketId(), &write_fds);
+//         FD_SET(its->GetSocketId(), &read_fds);
+//     }
+// }
+
+// for (std::map<int, Configuration>::iterator it = serverSockets.begin(); it != serverSockets.end(); it++)
+    // close(it->first);

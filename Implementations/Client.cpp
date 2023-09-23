@@ -6,16 +6,14 @@
 /*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/20 13:32:21 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/22 19:01:14 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/09/23 11:22:38 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Client.hpp"
 
 Client::Client()
-{
-    _fileName = GenerateFile();
-}
+{}
 
 // Client::Client(std::string method, std::string path, std::string fileExtention, std::string contentType, std::string httpVersion, int socketId)
 // {
@@ -71,5 +69,24 @@ const int& Client::GetSocketId( void ) const
 //     return (_fileExtention);
 // }
 
-Client::~Client()
-{ }
+Client::Client(const Client& other)
+{
+    if (this != &other)
+    {
+        this->_socketId = other._socketId;
+        this->_client_server = other._client_server;
+    }
+}
+
+Client& Client::operator=(const Client& other)
+{
+    if (this != &other)
+    {
+        this->_socketId = other._socketId;
+        this->_client_server = other._client_server;
+        this->response = other.response;
+    }
+    return *this;
+}
+
+Client::~Client() {}
