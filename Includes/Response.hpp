@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 17:34:48 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/23 11:03:39 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/10/23 17:47:32 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,6 @@ class Response : public Request
         Response(const Response& other);
         Response& operator=(const Response& other);
         void    Function();
-        const char* get_content_type(const char* path);
+        // const char* get_content_type(const char* path);
         ~Response();
 };

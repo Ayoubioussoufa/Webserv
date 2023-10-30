@@ -3,34 +3,33 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 12:25:06 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/19 13:04:31 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/10/30 07:28:30 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./Includes/Servers.hpp"
-#include "./Includes/Socket.hpp"
-//testing !!
-
-void sigpipeHandle(int sig) { if(sig) {}}
+#include "Includes/Servers.hpp"
 
 int main(int argc, char *argv[])
 {
     if (argc == 1 || argc == 2) {
 		try 
 		{
-            signal(SIGPIPE, sigpipeHandle);
             Servers configFile;
             std::string		config;
-            config = (argc == 1 ? "default.conf" : argv[1]);
+            config = (argc == 1 ? "configuration/default.conf" : argv[1]);
             configFile.ConfigFileParse(config);
         }
         catch (std::string& e)
         {
             std::cout << e << std::endl;
             return (1);
+        }
+        catch (std::exception& e)
+        {
+            std::cout << e.what() << std::endl;
         }
     }
     else 

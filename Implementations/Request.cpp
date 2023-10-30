@@ -3,30 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:27:53 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/23 13:53:52 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/10/24 18:39:20 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Request.hpp"
 
-Request::Request() {
-    std::string _ofile = GenerateFile();
+Request::Request() : _transferEncodingChunked(false), _transferEncoding(false), _contentLength(false), _headers_done(false), _condition(false), _chunked(false), _fd(-1) {
+    _responseStatus = OK;
+    _total = 0;
 }
 
+const int&  Request::getFd() const
+{
+    return _fd;
+}
 
 // Function to parse an HTTP request
-int Request::parseHttpRequest(const std::string& requestBuffer, int new_socket) {
-    (void)new_socket;
-    std::cout << "CHKE7777777777777777777" << std::endl;
-    int i = processChunk(requestBuffer);
-    std::cout << "CHKE7777777777777777777" << std::endl;
-    (void)i;
-    // if (!i)
-    //     return parseRequest();
-    return i;
+int Request::parseHttpRequest(std::string requestBuffer) {
+    return processChunk(requestBuffer);
 }
 
 size_t Request::customFind(const std::vector<char>& vec, const std::string& str, size_t start)
@@ -77,227 +75,314 @@ int Request::countNumbersInString(const std::string& inputString) {
     return count;
 }
 
-int		Request::processChunk(const std::string &buffer)
+int		Request::processChunk(std::string buffer)
 {
-    std::vector<char>	chunks;
-    int i = 0;
-    if (customFind(_header_before, "\n\r\n", 0) == std::string::npos)
+    if (!_headers_done)
     {
-	    while (buffer[i])
-            _header_before.push_back(buffer[i++]);
-        size_t pos = customFind(_header_before, "\r\n\r\n", 0);
-        if (pos != std::string::npos)
+        _all.append(buffer);
+        size_t done = _all.find("\r\n\r\n");
+        if (done != std::string::npos)
         {
-            chunks = customSubstr(_header_before, pos + 4, _header_before.size());
-            _header_before = customSubstr(_header_before, 0, pos + 4); // ! changeable
-            for (std::vector<char>::iterator it = _header_before.begin(); it != _header_before.end(); it++)
+            _header_before = _all.substr(0, done);
+            _bodies = _all.substr(done + 4);
+            _headers_done = true;
+            if (!parseHeaders())
             {
-                std::cout << *it;
-            }
-            std::cout << "----------------" << std::endl;
-            int j = parseHeaders();
-            if (!j)
+                _bodies.clear();
                 return 0;
+            }
         }
     }
     else
 	{
-        while (buffer[i])
-            chunks.push_back(buffer[i++]);
+        _bodies.append(buffer);
+        return processBody();
     }
-    _body.insert(_body.end(), chunks.begin(), chunks.end());
-    if (!_body.empty())
-    {
-        if (!_headers["Content-Length"].empty()) // ! possible segfault
-        {
-                std::string number = _headers["Content-Length"];
-                size_t len = strtol(number.c_str(), NULL, 10) + 12;
-                std::cout << len << "    " << "BODY SIZE : " << _body.size() << std::endl;
-                if (len <= _body.size())
-                {
-                    std::cout << "---------------------------------------" << std::endl;
-                    std::cout << "BEFORE +++++++++++++++++++++++++++++" << std::endl; 
-                    for (std::vector<char>::iterator it = _body.begin(); it != _body.end(); it++)
-                    {
-                        std::cout << *it;
-                    }
-                    std::cout << std::endl;
-                    processBody(_body);
-                    // std::cout << "AFTER +++++++++++++++++++++++++++++" << std::endl; 
-                    // for (std::vector<char>::iterator it = _body.begin(); it != _body.end(); it++)
-                    // {
-                    //     std::cout << *it;
-                    // }
-                    // std::cout << std::endl;
-                    // std::cout << "+++++++++++++++++++++++++++++" << std::endl; 
-                    // _header_before = _header_before + "\n\r\n" + _body + "\r\n\r\n";
-                    // std::cout << _header_before << std::endl;
-                    return 0;
-                }
-                else
-                    return 1;
-        }
-    }
-    else
-        return 0;
     return 1;
 }
 
-std::string Request::GenerateFile() {
-    std::string Base = "ABCDEFJHIGKLMNOPQRSTUVWXYZabcdefh12326544";
-    std::string file;
-    
-    // Create the directory if it doesn't exist
-    const char* dir_path = "/nfs/homes/aybiouss/Desktop/wepi/bodys/";
+std::string GenerateRandomString(int length) {
+    const char* Base = "ABCDEFJHIGKLMNOPQRSTUVWXYZabcdefh12326544";
+    std::string randomString;
+    for (int i = 0; i < length; i++) {
+        randomString += Base[rand() % strlen(Base)];
+    }
+    return randomString;
+}
+
+std::string GenerateTimestamp() {
+    time_t currentTime;
+    struct tm* localTimeInfo;
+    char timestamp[20];
+
+    time(&currentTime);
+    localTimeInfo = localtime(&currentTime);
+
+    strftime(timestamp, sizeof(timestamp), "%Y%m%d%H%M%S", localTimeInfo);
+
+    return timestamp;
+}
+
+std::string Request::GenerateFile(const std::string& UploadPath) {
+    std::string randomString = GenerateRandomString(6); // 6 characters for the filename
+    std::string timestamp = GenerateTimestamp();
+
+    const char* dir_path = UploadPath.c_str();
     if (mkdir(dir_path, 0777) != 0 && errno != EEXIST) {
         std::cerr << "Failed to create directory: " << strerror(errno) << std::endl;
         return "";  // Return an empty string to indicate failure
     }
-    
-    for (size_t i = 0; i < FILESIZE; i++) {
-        file += Base[rand() % Base.size()];
-    }
-    _ofile = dir_path + file;
+
+    std::string fileName = dir_path + timestamp + "_" + randomString;
+    // std::cout << randomString << " " << timestamp << std::endl;
+    _ofile = fileName;
     return _ofile;
 }
 
-
-void    Request::processBody(std::vector<char>& vec)
+std::map<int, std::string> Request::getStatusCode( void ) const
 {
-    size_t i = 0;
-    std::ofstream file(_ofile.c_str(), std::ios::out | std::ios::binary);
-
-    if (!file.is_open()) {
-        std::cerr << "Failed to open the file." << strerror(errno) << std::endl;
-        return;
-    }
-
-    while (i < vec.size()) {
-        // Find the position of "\r\n" to get the chunk size
-        size_t crlf_pos = customFind(vec, "\r\n", i);
-
-        if (crlf_pos == std::string::npos) {
-            std::cerr << "Error: Chunk size not found." << std::endl;
-            break;
-        }
-
-        // Extract the chunk size string and convert it to an integer
-        std::string chunk_size_str(vec.begin() + i, vec.begin() + crlf_pos);
-        char* endptr;
-        int chunk_size = strtol(chunk_size_str.c_str(), &endptr, 16);
-
-        if (*endptr != '\0' || chunk_size < 0) {
-            std::cerr << "Error: Invalid chunk size." << std::endl;
-            break;
-        }
-
-        // Move the index past the "\r\n"
-        i = crlf_pos + 2;
-
-        if (chunk_size == 0) {
-            // End of chunks
-            break;
-        }
-
-        // Check if there is enough data left in the vector
-        if (i + static_cast<size_t>(chunk_size) > vec.size()) {
-            std::cerr << "Error: Incomplete chunk data." << std::endl;
-            break;
-        }
-
-        // Write the chunk data to the file
-        file.write(&vec[i], chunk_size);
-
-        // Move past the "\r\n" at the end of the chunk
-        i += chunk_size + 2;
-    }
-    std::cout << "File Name : " << _ofile << std::endl;
-    file.close();
-    // exit(1);
-    // std::vector<char>	subchunk = customSubstr(vec, 0, 100);
-	// std::string	body = "";
-	// int			chunksize = strtol(&subchunk[0], NULL, 16);
-	// size_t		i = 0;
-	// while (chunksize)
-	// {
-	// 	i = customFind(vec, "\r\n", i) + 2;
-	// 	if (i + static_cast<size_t>(chunksize) <= vec.size()) {
-    //         body.insert(body.end(), vec.begin() + i, vec.begin() + i + chunksize);
-    //         i += chunksize + 2;
-    //         subchunk = customSubstr(vec, i, 100);
-    //         chunksize = strtol(&subchunk[0], NULL, 16);
-    //     } else {
-    //         // Handle case where chunksize is larger than remaining data
-    //         std::cerr << "Error: Invalid chunk size or incomplete data." << std::endl;
-    //         break;
-    //     }
-	// }
-    // std::ofstream file(_ofile.c_str(), std::ios::out | std::ios::binary);
-    // if (file.is_open())
-    // {
-    //     file.write(&body[0], body.size());
-    //     file.close();
-    // }
-    // else
-    //     std::cerr << "Failed to open the file." << strerror(errno) << std::endl;
+    return(_statusCode);
 }
 
-    // std::string body = _body;
-    // _body.clear();
-    // std::istringstream ss(body);
-    // std::string line;
-    // while (std::getline(ss, line) && !line.empty())
-    // {
-    //     int length = strtol(line.c_str(), NULL, 16);
-    //     if (length)
-    //     {
-    //         if (std::getline(ss, line) && !line.empty())
-    //         {
-                
-    //         }
-    //     }
-    // }
+void Request::CreateStatusCode()
+{
+    _statusCode[OK] = " 200 OK";
+    _statusCode[CREATED] = " 201 Created";
+    _statusCode[MOVEDPERMANENTLY] = " 301 Moved Permanently";
+    _statusCode[NOTALLOWED] = " 405 Method Not Allowed";
+    _statusCode[CONTENTTOLARGE] = " 413 Request Entity Too Large";
+    _statusCode[URLTOOLONGE] = " 414 Request-URI Too Long";
+    _statusCode[MOVEDTEMPORARILY] = " 302 Moved Temporarily";
+    _statusCode[USEPROXY] = " 305 Use Proxy";
+    _statusCode[MULTIPLECHOICES] = " 300 Multiple Choices";
+    _statusCode[NOCONTENT] = " 204 No Content";
+    _statusCode[RESETCONTENT] = " 205 Reset Content";
+    _statusCode[PARTIALCONTENT] = " 206 Partial Content";
+    _statusCode[SEEOTHER] = " 303 See Other";
+    _statusCode[NOTMODIFIED] = " 304 Not Modified";
+    _statusCode[TEMPORARYREDIRECT] = " 307 Temporary Redirect";
+    _statusCode[BADREQUEST] = " 400 Bad Request";
+    _statusCode[UNAUTHORIZED] = " 401 Unauthorized";
+    _statusCode[PAYMENTREQUIRED] = "402 Payment Required";
+    _statusCode[FORBIDDEN] = " 403 Forbidden";
+    _statusCode[NOTFOUND] = " 404 Not Found";
+    _statusCode[NOTACCEPTABLE] = " 406 Not Acceptable";
+    _statusCode[PROXYAUTHENTICATIONREQUIRED] = " 407 Proxy Authentication Required";
+    _statusCode[REQUESTTIMEOUT] = " 408 Request Time-out";
+    _statusCode[CONFLICT] = " 409 Conflict";
+    _statusCode[GONE] = " 410 Gone";
+    _statusCode[LENGTHREQUIRED] = " 411 Length Required";
+    _statusCode[PRECONDITIONFAILED] = " 412 Precondition Failed";
+    _statusCode[UNSUPPORTEDMEDIATYPE] = " 415 Unsupported Media Type";
+    _statusCode[REQUESTEDRANGENOTSATISFIABLE] = " 416 Requested range not satisfiable";
+    _statusCode[EXPECTATIONFAILED] = " 417 Expectation Failed";
+    _statusCode[INTERNALSERVERERROR] = " 500 Internal Server Error";
+    _statusCode[NOTIMPLEMENTED] = " 501 Not Implemented";
+    _statusCode[BADGATEWAY] = " 502 Bad Gateway";
+    _statusCode[SERVICEUNAVAILABLE] = " 503 Service Unavailable";
+    _statusCode[GATEWAYTIMEOUT] = " 504 Gateway Time-out";
+    _statusCode[HTTPVERSIONNOTSUPPORTED] = " 505 HTTP Version not supported";
+}
+
+int    Request::processBody()
+{
+    size_t crlf_pos = _bodies.find("\r\n");
+    if (crlf_pos != std::string::npos) {
+        std::string chunk_size_str = _bodies.substr(0, crlf_pos);
+        char* endptr;
+        int chunksize = strtoul(chunk_size_str.c_str(), &endptr, 16);
+        if (!chunksize)
+        {
+            // std::cout << "Body ended ..." << std::endl;
+            setResponseStatus(OK);
+            ft_close(_fd);
+            _fd = open(_name.c_str(), O_RDWR);
+            return 0;
+        }
+        if (_bodies.length() >= chunksize + 2 + crlf_pos + 2)
+        {
+            std::string str = _bodies.substr(crlf_pos + 2, chunksize);
+            if (write(_fd, str.c_str(), chunksize) < 0)
+            {
+                setResponseStatus(INTERNALSERVERERROR);
+                return 0;
+            }
+            _bodies = _bodies.substr(chunksize + 2 + crlf_pos + 2);
+            if (_bodies == "0\r\n\r\n")
+            {
+                // std::cout << "Body ended ..." << std::endl;
+                setResponseStatus(OK);
+                ft_close(_fd);
+                _fd = open(_name.c_str(), O_RDWR);
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+
+const std::map<std::string, std::string>& Request::getHeaders( void ) const
+{
+    return(_headers);
+}
 
 int    Request::parseHeaders()
 {
-    std::string header = vectorCharToString(_header_before);
-    std::istringstream requestStream(header);
+    std::istringstream requestStream(_header_before);
     std::string line;
 
     // Read the first line (request line)
     if (!std::getline(requestStream, line)) {
         // Handle an empty or incomplete request
-        setResponseStatus("400 Bad Request");
+        setResponseStatus(BADREQUEST);
         return 0;
     }
     std::istringstream requestLineStream(line);
     if (!(requestLineStream >> _method >> _path >> _httpVersion)) {
         // Handle invalid request line
-        setResponseStatus("400 Bad Request");
+        setResponseStatus(BADREQUEST);
         return 0;
     }
-    //This splitting is achieved by using the >> operator, which is used to extract values from the input stream (requestLineStream in this case) based on whitespace (spaces or tabs) as the delimiter.
-    if (_path == "/favicon.ico") {
-        // Handle it as needed (status), or simply return an empty request
+    if (_path.length() > 2048)
+    {
+        setResponseStatus(URLTOOLONGE);
         return 0;
     }
-    std::string forBody;
-    // Read and parse headers
-    while (std::getline(requestStream, line) && !line.empty()) {
-        forBody += line + "\n";
+    if (!_path.empty())
+    {
+        std::string str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
+        for (int i = 0; i < _path.length(); i++)
+        {
+            if (str.find(_path[i]) == std::string::npos)
+            {
+                setResponseStatus(BADREQUEST);
+                return 0;
+            }
+        }
+        while (1)
+        {
+            size_t found = _path.find("%");
+            if (found != std::string::npos)
+            {
+                std::string firstPart = _path.substr(0, found);
+                std::string secondPart = _path.substr(found + 3);
+                std::string number = _path.substr(found + 1, 2);
+                long int value = strtol(number.c_str(), NULL, 16);
+                if (value >= 0 && value <= 255) {
+                    char character = static_cast<char>(value);
+                    firstPart += character + secondPart;
+                    _path.clear();
+                    _path = firstPart;
+                }
+                else
+                {
+                    setResponseStatus(BADREQUEST);
+                    return 0;
+                }
+            }
+            else
+                break ;
+        }
+        size_t found = _path.find("?");
+        if (found != std::string::npos)
+        {
+            _queryString = _path.substr(found + 1);  // Get the substring after the '?'
+            _path = _path.substr(0, found);  // Get the substring before the '?'
+        }
+    }
+    while (std::getline(requestStream, line) && !line.empty())
+    {
         size_t pos = line.find(":");
-        if (pos != std::string::npos) {
+        if (pos != std::string::npos)
+        {
             std::string headerName = line.substr(0, pos);
             std::string headerValue = line.substr(pos + 1);
             // Remove leading/trailing whitespaces from header values
             headerValue.erase(0, headerValue.find_first_not_of(" \t"));
             headerValue.erase(headerValue.find_last_not_of(" \t") + 1);
             _headers[headerName] = headerValue;
+            if (headerName == "Content-Type")
+            {
+                size_t pos = headerValue.find("\r");
+                if (pos == std::string::npos)
+                    _contentTypeValue = headerValue;
+                else
+                    _contentTypeValue = headerValue.substr(0, pos);
+            }
+            if (headerName == "Transfer-Encoding")
+                _transferEncoding = true;
+            if (headerName == "Content-Length")
+            {
+                _length = strtol(headerValue.c_str(), NULL, 10);
+                _contentLength = true;
+            }
+            if (headerName == "Transfer-Encoding" && headerValue != "chunked\r")
+                _transferEncodingChunked = true;
+            if (headerName == "Transfer-Encoding" && headerValue == "chunked\r")
+                _chunked = true;
+            if (headerName == "Host")
+                _value = headerValue.substr(0, headerValue.length() - 1);
         }
     }
-    if (_method == "GET")
+    if (_length > _client_max_body_size && _client_max_body_size != 0)
+    {
+        setResponseStatus(CONTENTTOLARGE);
         return 0;
+    }
+    if (_transferEncodingChunked)
+    {
+        setResponseStatus(NOTIMPLEMENTED);
+        return 0;
+    }
+    if (!_transferEncoding && !_contentLength && _method == "POST")
+    {
+        setResponseStatus(400);
+        return 0;
+    }
+    if (_method == "GET" || _method == "DELETE")
+    {
+        setResponseStatus(OK);
+        return 0;
+    }
+    else if (_method == "POST")
+    {
+        std::string extension = extensions();
+        _name = GenerateFile(_upload) + extension;
+        _fd = open(_name.c_str(), O_RDWR | O_APPEND | O_CREAT, 0666);
+        if (_fd == -1) {
+            std::cerr << "Failed to open the file." << std::endl;
+            return 0;
+        }
+        if (!_chunked)
+            return processAllBody();
+        else
+            return processBody();
+    }
+    else
+    {
+        setResponseStatus(NOTIMPLEMENTED);
+        return 0;
+    }
     return 1;
+}
+
+int Request::processAllBody()
+{
+    if (write(_fd, _bodies.c_str(), _bodies.length()) < 0)
+    {
+        setResponseStatus(INTERNALSERVERERROR);
+        return 0;
+    }
+    _total += _bodies.length();
+    if (_total < _length)
+    {
+        _condition = true;
+        return 1;
+    }
+    setResponseStatus(OK);
+    ft_close(_fd);
+    _fd = open(_name.c_str(), O_RDWR);
+    return 0;
 }
 
 std::string Request::vectorCharToString(const std::vector<char>& vec)
@@ -310,15 +395,40 @@ std::string Request::vectorCharToString(const std::vector<char>& vec)
     return result;
 }
 
+std::string     Request::getQueryString() const
+{
+    if (!_queryString.empty())
+        return _queryString;
+    return ("");
+}
+
 Request::Request(const Request& other)
     :   _method(other._method),
         _path(other._path),
         _httpVersion(other._httpVersion),
+        _responseStatus(other._responseStatus),
         _header_before(other._header_before),
         _body(other._body),
         _headers(other._headers),
+        _statusCode(other._statusCode),
+        _contentType(other._contentType),
         _bodyFile(other._bodyFile),
-        _ofile(other._ofile) {}
+        _ofile(other._ofile),
+        _chunksize(other._chunksize),
+        _bodies(other._bodies),
+        _all(other._all),
+        _queryString(other._queryString),
+        _transferEncodingChunked(other._transferEncodingChunked),
+        _transferEncoding(other._transferEncoding),
+        _contentLength(other._contentLength),
+        _headers_done(other._headers_done),
+        _fd(other._fd),
+        _contentTypeValue(other._contentTypeValue),
+        _condition(other._condition),
+        _length(other._length),
+        _total(other._total),
+        _chunked(other._chunked),
+        _name(other._name) {}
 
 Request& Request::operator=(const Request& other)
 {
@@ -327,110 +437,77 @@ Request& Request::operator=(const Request& other)
         _method = other._method;
         _path = other._path;
         _httpVersion = other._httpVersion;
+        _responseStatus = other._responseStatus;
         _header_before = other._header_before;
         _body = other._body;
         _headers = other._headers;
+        _statusCode = other._statusCode;
+        _contentType = other._contentType;
         _bodyFile = other._bodyFile;
         _ofile = other._ofile;
+        _chunksize = other._chunksize;
+        _bodies = other._bodies;
+        _all = other._all;
+        _queryString = other._queryString;
+        _transferEncodingChunked = other._transferEncodingChunked;
+        _transferEncoding = other._transferEncoding;
+        _contentLength = other._contentLength;
+        _headers_done = other._headers_done;
+        _fd = other._fd;
+        _contentTypeValue = other._contentTypeValue;
+        _condition = other._condition;
+        _length = other._length;
+        _total = other._total;
+        _chunked = other._chunked;
+        _name = other._name;
     }
     return *this;
 }
 
-/*int Request::parseRequest()
+std::string         Request::extensions( void ) const
 {
-    // std::cout << "----------------+++++++++++++++++++++++++++" << std::endl;
-    // std::cout << _header_before << std::endl;
-    // std::cout << "----------------+++++++++++++++++++++++++++" << std::endl;
-    // return 1;
-    std::istringstream requestStream(_header_before);
-    std::string line;
+    std::string extention;
+    // Create a map to store file extensions keyed by MIME types
+    std::map<std::string, std::string> mimeTypeToExtensionMap;
 
-    // Read the first line (request line)
-    if (!std::getline(requestStream, line)) {
-        // Handle an empty or incomplete request
-        setResponseStatus("400 Bad Request");
-        return 0;
-    }
-    std::istringstream requestLineStream(line);
-    if (!(requestLineStream >> _method >> _path >> _httpVersion)) {
-        // Handle invalid request line
-        setResponseStatus("400 Bad Request");
-        return 0;
-    }
-    //This splitting is achieved by using the >> operator, which is used to extract values from the input stream (requestLineStream in this case) based on whitespace (spaces or tabs) as the delimiter.
-    if (_path == "/favicon.ico") {
-        // Handle it as needed (status), or simply return an empty request
-        return 0;
-    }
-    std::string forBody;
-    bool isContentLengthFound = false;
-    std::size_t contentLength = 0;
-    // Read and parse headers
-    while (std::getline(requestStream, line) && !line.empty()) {
-        forBody += line + "\n";
-        size_t pos = line.find(":");
-        if (pos != std::string::npos) {
-            std::string headerName = line.substr(0, pos);
-            std::string headerValue = line.substr(pos + 1);
-            // Remove leading/trailing whitespaces from header values
-            headerValue.erase(0, headerValue.find_first_not_of(" \t"));
-            headerValue.erase(headerValue.find_last_not_of(" \t") + 1);
-            _headers[headerName] = headerValue;
-            if (_method == "POST" && headerName == "Content-Length")
-            {
-                try {
-                    char* endptr;
-                    const char* headerValueCStr = headerValue.c_str();
-                    unsigned long parsedContentLength = strtoul(headerValueCStr, &endptr, 10);
+    // Populate the map with common MIME types and their corresponding file extensions
+    mimeTypeToExtensionMap["text/html"] = ".html";
+    mimeTypeToExtensionMap["text/plain"] = ".txt";
+    mimeTypeToExtensionMap["text/css"] = ".css";
+    mimeTypeToExtensionMap["application/javascript"] = ".js";
+    mimeTypeToExtensionMap["application/json"] = ".json";
+    mimeTypeToExtensionMap["image/jpeg"] = ".jpeg";
+    mimeTypeToExtensionMap["image/jpeg"] = ".jpg";
+    mimeTypeToExtensionMap["image/png"] = ".png";
+    mimeTypeToExtensionMap["image/gif"] = ".gif";
+    mimeTypeToExtensionMap["video/mp4"] = ".mp4";
+    mimeTypeToExtensionMap["image/x-icon"] = ".ico";
+    extention = mimeTypeToExtensionMap[_contentTypeValue];
+    return (extention);
+}
 
-                    if (parsedContentLength == ULONG_MAX) { endptr == headerValueCStr || *endptr != '\0' ||
-                        // Handle invalid Content-Length value
-                        setResponseStatus("400 Bad Request");
-                        return 0;
-                    }
-                    contentLength = parsedContentLength;
-                    isContentLengthFound = true;
-                } catch (const std::exception& e) {
-                    // Handle invalid Content-Length value
-                    setResponseStatus("400 Bad Request");
-                    return 0;
-                }
-            }
-        }
-    }
-    // std::cout << "*******************" << std::endl;
-    // for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
-    // {
-    //     std::cout << it->first << " " << it->second << std::endl;
-    // }
-    // std::cout << std::endl;
-    // std::cout << "*******************" << std::endl;
-    // (void)new_socket;
-    if (_method == "POST") {
-        if (!isContentLengthFound) {
-            // Handle missing Content-Length header for POST requests
-            setResponseStatus("411 Length Required");
-            return 0;
-        }
-        std::size_t bodyPos = forBody.find("\r\n\r\n");
-        if (bodyPos != std::string::npos) {
-            // Extract the body
-            std::string requestBody = forBody.substr(bodyPos + 4);
-            // Write the body to a file
-            _bodyFile = "BodyOfRequest.txt";
-            std::ofstream outfile(_bodyFile, std::ofstream::binary);
-            outfile.write(requestBody.c_str(), contentLength);
-            outfile.close();
-        }
-        else {
-            // Handle missing Content-Length header for POST requests
-            setResponseStatus("411 Length Required");
-            return 0;
-        }
-    }
-    setResponseStatus("200 OK");
-    return (0);
-}*/
+std::string Request::GetFileExtention( void ) const
+{
+    std::string extention;
+    size_t index;
+
+    index = _path.find('.');
+    if (index == std::string::npos)
+        return(extention);
+    extention = _path.substr(index);
+    return (extention);
+}
+std::string         Request::getContentType( void ) const
+{
+    std::string type;
+
+    type = _path.substr(_path.find('.'));
+    return (type);
+}
+void                Request::setPath(std::string newPath)
+{
+    _path = newPath;
+}
 
 const std::string& Request::getPath() const
 {
@@ -447,32 +524,13 @@ const std::string& Request::getHttpVersion() const
     return this->_httpVersion;
 }
 
-const std::string& Request::getResponseStatus() const
+int Request::getResponseStatus() const
 {
     return this->_responseStatus;
 }
 
-void Request::setResponseStatus(const std::string& status) {
+void Request::setResponseStatus(int status) {
     _responseStatus = status;
 }
 
 Request::~Request() {}
-
-
-    // if ()
-	// std::string	subchunk = chunks.substr(0, 100);
-	// std::string	body = "";
-	// int			chunksize = strtol(subchunk.c_str(), NULL, 16);
-	// size_t		i = 0;
-	// while (chunksize)
-	// {
-	// 	i = chunks.find("\r\n", i) + 2;
-	// 	body += chunks.substr(i, chunksize);
-	// 	i += chunksize + 2;
-	// 	subchunk = chunks.substr(i, 100);
-	// 	chunksize = strtol(subchunk.c_str(), NULL, 16);
-	// }
-	// std::string requestBuffer = head + "\r\n\r\n" + body + "\r\n\r\n"; // NJM3Ha kamla onsiftha l constructor again and clear the old one
-    // std::cout << requestBuffer << std::endl;
-    // ! if content length == body.size means the request is done !
-    // return 0;

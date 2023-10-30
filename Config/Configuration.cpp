@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aybiouss <aybiouss@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/22 13:38:30 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/10/23 16:22:07 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,12 @@ Configuration::Configuration(std::vector<std::string> vecteur)
     {
         std::string line = *begin;
         std::vector<std::string> token = Tokenization(line);
-        if (token.empty())
-        {
-            // Skip empty lines.
-            ++begin;
-            continue;
-        }
+        // if (token.empty())
+        // {
+        //     // Skip empty lines.
+        //     ++begin;
+        //     continue;
+        // }
         if (token[0] == "host" && token.size() == 2)
         {
             ++begin;
@@ -121,7 +121,9 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             // Extract and set CGI settings
             ++begin;
             if (token.size() == 3 && begin != end)
+            {
                 InitCgi(token[1], token[2]);
+            }
             else
                 throw std::string("Invalid cgi arguments");
         }
@@ -135,7 +137,7 @@ Configuration::Configuration(std::vector<std::string> vecteur)
         }
         else if (token[0] == "location")
         {
-            ++begin; // ! ach andir hnaya ...
+            ++begin;
             if (begin != end && token.size() == 2)
             {
                 // Find the closing curly brace of the location block.
@@ -144,7 +146,10 @@ Configuration::Configuration(std::vector<std::string> vecteur)
                 {
                 // Create a Location object and add it to the vector.
                     Location location(token[1], begin, endIt);
-                    _locations.push_back(location); // ! 3lach makitzadch size of locations ? makitkhchawch kamlin ?? 
+                    // std::cout << location << std::endl;
+                    // std::cout << "********************************" << std::endl;
+                    _locations.push_back(location);
+                    // ? hitax ma3amelx copy assignment
                     // Move the iterator to the next position after the location block.
                     begin = endIt + 1; // Advance by 1 to skip the closing brace.
                 }
@@ -158,28 +163,49 @@ Configuration::Configuration(std::vector<std::string> vecteur)
             begin++;
     }
     if (getRoot().empty())
-		InitRoot("/");
+		throw std::string("No root found");
 	if (getHost().empty())
-		InitHost("localhost;");
+		InitHost("localhost");
 	if (getIndex().empty())
-		InitIndex("index.html;"); // ! remove ; ?
+		InitIndex("");
     if (checkLocations())
         throw std::string("Location is duplicated");
     if (!getPort())
-		throw std::string("Port not found"); // ! throw exception wla n3mro b 80
-    // std::vector<int> it = getCodes();
-    // std::map<int, std::string> pages = getErrorPages();
-    // for (std::vector<int>::iterator it2 = it.begin(); it2 != it.end(); it2++)
-    // {
-    //     if (getTypePath(pages[*it2]) != 2)
-    //     {
-    // 	    if (getTypePath(this->_root + pages[*it2]) != 1)
-    // 	    	throw std::string ("Incorrect path for error page file: " + this->_root + pages[*it2]);
-    // 	    if (checkFile(this->_root + pages[*it2], 0) == -1 || checkFile(this->_root + pages[*it2], 4) == -1)
-    // 	    	throw std::string ("Error page file :" + this->_root + pages[*it2] + " is not accessible");
-    //     }
-    // } // ! to be fixed !! 
+		throw std::string("Port not found");
+    if (getServerNames().empty())
+        throw std::string("No server name");
+    std::vector<int> it = getCodes();
+    std::map<int, std::string> pages = getErrorPages();
+    for (std::vector<int>::iterator it2 = it.begin(); it2 != it.end(); it2++)
+    {
+        if (getTypePath(pages[*it2]) != 2)
+        {
+    	    if (checkFile(this->_root + pages[*it2], 0) == -1 || checkFile(this->_root + pages[*it2], 4) == -1)
+    	    	throw std::string ("Error page file :" + this->_root + pages[*it2] + " is not accessible");
+        } // ! l3iba
+    } // ! to be fixed !! 
+    std::vector<Location> sortedLocations = _locations;
+    int n = sortedLocations.size();
+    for (int i = 0; i < n - 1; ++i)
+    {
+        for (int j = 0; j < n - i - 1; ++j)
+        {
+            if (compareLocations(sortedLocations[j], sortedLocations[j + 1]))
+            {
+                Location tmp = sortedLocations[j];
+                sortedLocations[j] = sortedLocations[j + 1];
+                sortedLocations[j + 1] = tmp;
+            }
+        }
+    }
+    _locations.clear();
+    _locations = sortedLocations;
 } //ila kant / katdir getcwd
+
+bool    Configuration::compareLocations(const Location& loc1, const Location& loc2)
+{
+    return loc1.getpattern().length() > loc2.getpattern().length();   
+}
 
 std::vector<int>    Configuration::getCodes() const
 {
@@ -234,9 +260,9 @@ bool Configuration::checkLocations() const
 
 Configuration::Configuration(const Configuration& other)
     : _root(other._root), _host(other._host), _index(other._index),
-      _error_pages(other._error_pages), _codes(other._codes), _client_max_body_size(other._client_max_body_size),
+      _error_pages(other._error_pages), _codes(other._codes), _cgi(other._cgi), _client_max_body_size(other._client_max_body_size),
       _AutoIndex(other._AutoIndex), _root_exists(other._root_exists), _port(other._port),
-      _host_exists(other._host_exists), _port_exists(other._port_exists),
+      _host_exists(other._host_exists), _port_exists(other._port_exists), _upload(other._upload),
       _server_name(other._server_name), _locations(other._locations) {}
 
 Configuration& Configuration::operator=(const Configuration& other)
@@ -262,10 +288,6 @@ Configuration& Configuration::operator=(const Configuration& other)
     return *this;
 }
 
-std::map<std::string, std::string>  Configuration::getCgi() const
-{
-    return _cgi;
-}
 void Configuration::InitCgi(std::string path, std::string lang)
 {
     if (!lang.empty() && !path.empty())
@@ -393,6 +415,11 @@ std::string Configuration::getIndex() const
     return _index;
 }
 
+std::map<std::string, std::string> Configuration::getCgi() const
+{
+    return _cgi;
+}
+
 std::map<int, std::string> Configuration::getErrorPages() const
 {
     return _error_pages;
@@ -435,12 +462,24 @@ std::ostream& operator<<(std::ostream& o, Configuration obj)
     o << "Host: " << obj.getHost() << std::endl;
     o << "Port: " << obj.getPort() << std::endl;
     o << "Server Name: " << obj.getServerNames() << std::endl;
-    
+    std::map<int, std::string> p = obj.getErrorPages();
+    for (std::map<int, std::string>::iterator it = p.begin(); it != p.end(); it++)
+    {
+        o << "Error pages: " << it->first << "  " << it->second << " " << std::endl;
+    }
+    // o << std::endl;
     // Output location blocks
-    std::vector<Location> locations = obj.getLocations();
-    for (std::vector<Location>::const_iterator it = locations.begin(); it != locations.end(); ++it) {
+    std::map<std::string, std::string> b = obj.getCgi();
+    for (std::map<std::string, std::string>::iterator it = b.begin(); it != b.end(); it++)
+    {
+        o << "cgi: " << it->first << "  " << it->second << " " << std::endl;
+    }
+    o << std::endl;
+    std::vector<Location> loca = obj.getLocations();
+    for (std::vector<Location>::iterator it = loca.begin(); it != loca.end(); ++it) {
         std::cout << *it << std::endl;
     }
+    std::cout << "-----------------------------" << std::endl;
     return o;
 }
 // This code defines the Configuration class with member functions for initialization and access to its attributes. It also handles parsing location blocks and uses the Location class to store and manage them.
