@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/17 11:36:51 by sben-ela          #+#    #+#             */
-/*   Updated: 2023/10/30 07:34:47 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/10/23 17:45:48 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,8 @@ std::string Client::GenerateDirectoryListing(const std::string& directoryPath) {
             if (std::string(entry->d_name) != "." && std::string(entry->d_name) != "..") {
                 std::string filePath = directoryPath + "/" + entry->d_name;
                 struct stat fileStat;
-                if (stat(filePath.c_str(), &fileStat) == 0) {
+                if (stat(filePath.c_str(), &fileStat) == 0)
+                {
                     std::string fileSize;
                     if (S_ISDIR(fileStat.st_mode)) {
                         fileSize = "Directory";
@@ -154,7 +155,7 @@ void    Client::Reply( void )
 {
     if (response.GetFileExtention() == ".php" || response.GetFileExtention() == ".py")
     {
-        _CgiFile = response.GenerateFile("/Users/aybiouss/goinfre/");
+        _CgiFile = response.GenerateFile("/Users/sben-ela/goinfre/");
         _cgiTimer = std::time(NULL);
         _cgiPid = fork();
         if (!_cgiPid)
@@ -302,7 +303,7 @@ void    Delete_dir(const std::string& folderPath)
         {
             if (target->d_type == DT_REG)
                 std::remove((folderPath + "/" + target->d_name).c_str());
-            else if (strcmp( target->d_name , ".") && strcmp( target->d_name , "..") && target->d_type == DT_DIR)
+            else if (strcmp(target->d_name , ".") && strcmp( target->d_name , "..") && target->d_type == DT_DIR)
             {
                 Delete_dir(folderPath + "/" + target->d_name);
                 rmdir((folderPath + "/" + target->d_name).c_str());

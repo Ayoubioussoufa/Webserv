@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/10/30 07:29:40 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/10/23 18:12:16 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,12 @@ int Servers::ConfigFileParse(std::string file)
                 if (blockStack.empty())
                 {
                     insideServerBlock = false; // Stop when we encounter the closing curly brace
+                    // hna ndwz string kamlo (block) bach itparsa f configuration onmchi n9lb 3la next server f configfile
                     Configuration config(block);
                     _servers.push_back(config);
+                    // std::cout  << "Servers size : " << _servers.size() << std::endl;
+                    //     std::cout << block[i] << std::endl;
+                    // }
                     block.clear(); // Clear the block for the next server
                 }
             }
@@ -150,6 +154,7 @@ int Servers::AllServers()
         memset(&hints, 0, sizeof(hints));
         hints.ai_family = AF_INET;
         hints.ai_socktype = SOCK_STREAM;
+        // hints.ai_flags = AI_PASSIVE; // !
         std::ostringstream s;
         s << it->getPort();
         if (getaddrinfo(it->getHost().c_str(), s.str().c_str(), &hints, &res) != 0)
