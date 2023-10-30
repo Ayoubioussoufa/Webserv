@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/04 13:11:31 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/10/23 18:12:16 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/10/30 14:09:46 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,6 +218,7 @@ int Servers::AllServers()
         fd_set tmp_read = read_fds;
         fd_set tmp_write = write_fds;
         int readySockets = select(maxFd + 1, &tmp_read, &tmp_write, NULL, NULL); // !
+        std::cout << "wef" << std::endl;
         if (readySockets < 0)
         {
             for (int fd = 0; fd <= maxFd; fd++)
@@ -322,7 +323,7 @@ int Servers::AllServers()
         }
         for (std::vector<Client>::iterator its = _client.begin(); its != _client.end();)
         {
-            conditions = true; // khliha
+            conditions = true;
             if (FD_ISSET(its->GetSocketId(), &tmp_write))
             {
                 its->_responseStatus = -2;

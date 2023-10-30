@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sben-ela <sben-ela@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:06 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/09/24 14:46:52 by sben-ela         ###   ########.fr       */
+/*   Updated: 2023/10/30 13:35:01 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,11 +139,6 @@ Location::Location(std::string path, TokenVectsIter& begin, TokenVectsIter& end)
             ++begin;
         // Handle other tokens as needed
     }
-    // std::cout << "#############################33" << std::endl;
-    // std::cout << this->getRoot() << std::endl;
-    // std::cout << "#############################33" << std::endl;
-    // std::cout << *this << std::endl;
-    // std::cout << "#############################33" << std::endl;
 }
 
 Location::Location(const Location& other)
@@ -359,7 +354,5 @@ std::ostream& operator<<(std::ostream& o, Location obj)
         o << "Cgi: " << it->first << "  " << it->second << " " << std::endl;
     }
     o << std::endl;
-    // std::copy(obj.getIndex().begin(), obj.getIndex().end(), std::ostream_iterator<std::string>(o, ", "));
-    // Output other members as needed
     return o;
 }

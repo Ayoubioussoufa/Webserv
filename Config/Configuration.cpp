@@ -6,7 +6,7 @@
 /*   By: aybiouss <aybiouss@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 09:26:09 by aybiouss          #+#    #+#             */
-/*   Updated: 2023/10/23 16:22:07 by aybiouss         ###   ########.fr       */
+/*   Updated: 2023/10/30 13:58:19 by aybiouss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,8 +183,6 @@ Configuration::Configuration(std::vector<std::string> vecteur)
         throw std::string("Location is duplicated");
     if (!getPort())
 		throw std::string("Port not found");
-    if (getServerNames().empty())
-        throw std::string("No server name");
     std::vector<int> it = getCodes();
     std::map<int, std::string> pages = getErrorPages();
     for (std::vector<int>::iterator it2 = it.begin(); it2 != it.end(); it2++)
