@@ -1,7 +1,7 @@
 NAME = webserv
 CC = c++
 RM = rm -f
-CPPFLAGS =  -std=c++98 -fsanitize=address
+CPPFLAGS =  -std=c++98
 IMPLEMENTATIONS = Request.cpp Response.cpp Client.cpp 
 CONFIG = Servers.cpp Configuration.cpp Location.cpp
 SRCS = $(addprefix ./Config/, $(CONFIG)) \
@@ -16,9 +16,9 @@ $(NAME): $(OBJ)
 
 clean:
 	$(RM) $(OBJ)
-	$(RM) data/Post/*
 
 fclean: clean
 	$(RM) $(NAME)
+	$(RM) data/Post/*
 
 re: fclean $(NAME)

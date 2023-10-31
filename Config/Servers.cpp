@@ -11,13 +11,8 @@
 /* ************************************************************************** */
 
 #include "../Includes/Servers.hpp"
-// #include "../Response/Response.hpp"
 
-// Getting all the blocks !!!
-Servers::Servers() {
-    // _client.clear();
-    // _servers.clear();
-}
+Servers::Servers() {}
 
 Servers::Servers(const Servers& other)
 {
@@ -68,12 +63,8 @@ int Servers::ConfigFileParse(std::string file)
                 if (blockStack.empty())
                 {
                     insideServerBlock = false; // Stop when we encounter the closing curly brace
-                    // hna ndwz string kamlo (block) bach itparsa f configuration onmchi n9lb 3la next server f configfile
                     Configuration config(block);
                     _servers.push_back(config);
-                    // std::cout  << "Servers size : " << _servers.size() << std::endl;
-                    //     std::cout << block[i] << std::endl;
-                    // }
                     block.clear(); // Clear the block for the next server
                 }
             }
@@ -154,7 +145,6 @@ int Servers::AllServers()
         memset(&hints, 0, sizeof(hints));
         hints.ai_family = AF_INET;
         hints.ai_socktype = SOCK_STREAM;
-        // hints.ai_flags = AI_PASSIVE; // !
         std::ostringstream s;
         s << it->getPort();
         if (getaddrinfo(it->getHost().c_str(), s.str().c_str(), &hints, &res) != 0)
@@ -217,8 +207,7 @@ int Servers::AllServers()
         FD_CLR(0, &write_fds);
         fd_set tmp_read = read_fds;
         fd_set tmp_write = write_fds;
-        int readySockets = select(maxFd + 1, &tmp_read, &tmp_write, NULL, NULL); // !
-        std::cout << "wef" << std::endl;
+        int readySockets = select(maxFd + 1, &tmp_read, &tmp_write, NULL, NULL);
         if (readySockets < 0)
         {
             for (int fd = 0; fd <= maxFd; fd++)

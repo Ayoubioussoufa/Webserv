@@ -157,7 +157,7 @@ void    Client::Reply( void )
 {
     if (response.GetFileExtention() == ".php" || response.GetFileExtention() == ".py")
     {
-        _CgiFile = response.GenerateFile("/Users/aybiouss/goinfre/");
+        _CgiFile = response.GenerateFile("/Users/sben-ela/goinfre/");
         _cgiTimer = std::time(NULL);
         _cgiPid = fork();
         if (!_cgiPid)
@@ -177,10 +177,8 @@ void    Client::Reply( void )
                 dup2(bodyFd, STDIN_FILENO);
                 ft_close(bodyFd);
             }
-            
             execve(Path[0], Path, _env);
             deleteEnv();
-            std::cout << "ERRRRORRR" << std::endl;
             exit(EXFIALE);
         }
         _status = CGI;
@@ -396,12 +394,10 @@ void    Client::ft_Response( void )
     catch(std::exception &e)
     {
         _responseStatus = -1;
-        // std::cout << e.what() << std::endl;
     } 
     catch(std::string &e)
     {
         _responseStatus = -1;
-        // std::cout << e << std::endl;
     }
     catch(...)
     {

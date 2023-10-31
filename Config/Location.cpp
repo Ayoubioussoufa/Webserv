@@ -63,7 +63,7 @@ Location::Location(std::string path, TokenVectsIter& begin, TokenVectsIter& end)
             {
                 InitLimitExcept(token[i]);
                 i++;
-            } // ! ba9i aykhssni nsre3ha (BASFA)
+            }
             ++begin;
         }
         else if (token[0] == "autoindex")
@@ -253,8 +253,6 @@ void Location::InitClientBodySize(std::string value)
 void Location::InitAutoIndex(std::string value)
 {
     // Implement this method to initialize the AutoIndex flag.
-    // You would need to parse and store the flag based on your needs.
-
     // Convert the input string to lowercase for case-insensitive comparison
     std::transform(value.begin(), value.end(), value.begin(), ::tolower);
 
